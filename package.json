@@ -1,0 +1,22 @@
+{
+  "name": "apollo-query-whitelisting",
+  "version": "0.0.1",
+  "description": "A build tool that statically analyzes GraphQL queries to produce a hash to query mapping which can be used for query whitelisting, referencing, etc.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Poincare/apollo-query-whitelisting.git"
+  },
+  "author": "Dhaivat Pandya",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Poincare/apollo-query-whitelisting/issues"
+  },
+  "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
+  "devDependencies": {
+    "typescript": "^2.0.3"
+  }
+}
