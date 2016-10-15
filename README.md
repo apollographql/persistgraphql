@@ -38,3 +38,5 @@ extractgql index.ts output.json
 # Progress
 - Made Github Repo
 - Wrote some of this README
+- Wrote basic utility methods of `ExtractGQL`
+- Filled out the basic structure of `ExtractGQL`
