@@ -6,9 +6,9 @@ import { ExtractGQL } from '../src/index';
 describe('ExtractGQL', () => {
   it('should be able to construct an instance', () => {
     assert.doesNotThrow(() => {
-      const egql = new ExtractGQL({
-        inputFilePath: "queries.graphql",
-        outputFilePath: "output.json",
+      new ExtractGQL({
+        inputFilePath: 'queries.graphql',
+        outputFilePath: 'output.json',
       });
     });
   });
