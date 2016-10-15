@@ -5,7 +5,14 @@ import path = require('path');
 // and use that instead of the graphql package.
 import { 
   parse,
+  Document,
 } from 'graphql';
+
+// A map from a key (id or a hash) to a GraphQL document.
+// TODO fix the "any" here and replace with a GraphQL document type.
+export interface OutputMap {
+  [key: string]: Document;
+}
 
 export class ExtractGQL {
   public inputFilePath: string;
@@ -59,10 +66,19 @@ export class ExtractGQL {
     this.outputFilePath = outputFilePath;
   }
 
-  public processGraphQLFile(graphQLFile: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+  // Create an OutputMap from a GraphQL document that may contain
+  // queries, mutations and fragments.
+  public createMapFromDocument(document: Document): OutputMap {
+    return {};
+  }
 
-    });
+  public processGraphQLFile(graphQLFile: string): Promise<OutputMap> {
+    return new Promise<OutputMap>((resolve, reject) => {
+      ExtractGQL.readFile(graphQLFile).then((fileContents) => {
+        const graphQLDocument = parse(fileContents);
+        resolve(this.createMapFromDocument(graphQLDocument));
+      }); 
+    }); 
   }
 
   public processInputFile(inputFile: string): Promise<boolean> {
