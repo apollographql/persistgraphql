@@ -6,7 +6,8 @@
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
-    "compile": "tsc"
+    "compile": "tsc",
+    "lint": "tslint -c tslint.json test/**/*.ts; tslint src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,7 @@
     "es6-promise": "^4.0.5",
     "mocha": "^3.1.2",
     "source-map-support": "^0.4.3",
+    "tslint": "^3.15.1",
     "typescript": "^2.0.3"
   }
 }
