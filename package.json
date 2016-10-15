@@ -6,6 +6,7 @@
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
+    "posttest": "npm run lint",
     "compile": "tsc",
     "lint": "tslint -c tslint.json test/**/*.ts; tslint src/**/*.ts"
   },
@@ -21,13 +22,20 @@
   "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
   "devDependencies": {
     "@types/chai": "^3.4.34",
+    "@types/graphql": "^0.7.1",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.45",
     "chai": "^3.5.0",
     "es6-promise": "^4.0.5",
+    "graphql": "^0.7.2",
+    "graphql-tag": "^0.1.14",
     "mocha": "^3.1.2",
     "source-map-support": "^0.4.3",
     "tslint": "^3.15.1",
+    "typed-graphql": "^1.0.2",
     "typescript": "^2.0.3"
+  },
+  "dependencies": {
+    "@types/graphql": "^0.7.1"
   }
 }
