@@ -1,4 +1,4 @@
-# GraphQL Query Whitelisting
+# ExtractGQL
 
 This will be a simple build tool that enables query whitelisting for projects that use statically analyze-able GraphQL queries.
 

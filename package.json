@@ -1,5 +1,5 @@
 {
-  "name": "apollo-query-whitelisting",
+  "name": "extractgql",
   "version": "0.0.1",
   "description": "A build tool that statically analyzes GraphQL queries to produce a hash to query mapping which can be used for query whitelisting, referencing, etc.",
   "main": "dist/index.js",
