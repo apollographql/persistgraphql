@@ -4,7 +4,9 @@
   "description": "A build tool that statically analyzes GraphQL queries to produce a hash to query mapping which can be used for query whitelisting, referencing, etc.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha"
+    "pretest": "npm run compile",
+    "test": "mocha --reporter spec --full-trace lib/test/tests.js",
+    "compile": "tsc"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,12 @@
   },
   "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
   "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
+    "chai": "^3.5.0",
+    "es6-promise": "^4.0.5",
+    "mocha": "^3.1.2",
     "typescript": "^2.0.3"
   }
 }
