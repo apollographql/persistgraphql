@@ -8,6 +8,10 @@ import {
   Document,
 } from 'graphql';
 
+import {
+  getQueryDefinitions
+} from './extractFromAST';
+
 // A map from a key (id or a hash) to a GraphQL document.
 // TODO fix the "any" here and replace with a GraphQL document type.
 export interface OutputMap {
@@ -69,7 +73,7 @@ export class ExtractGQL {
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
-    return {};
+      return {};
   }
 
   public processGraphQLFile(graphQLFile: string): Promise<OutputMap> {
