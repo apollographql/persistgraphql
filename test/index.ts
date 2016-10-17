@@ -60,4 +60,24 @@ describe('ExtractGQL', () => {
       });
     });
   });
+
+  describe('createMapFromDocument', () => {
+    const egql = new ExtractGQL({ inputFilePath: "no_file.txt"});
+
+    it('should be able to handle a document with no queries', () => {
+      const document = gql`mutation something { otherThing }`;
+      const map = egql.createMapFromDocument(document);
+      assert.deepEqual(map, {});
+    });
+
+    it('should be able to handle a document with a single query', () => {
+      const document = gql`query author { 
+        name
+      }`;
+      const map = egql.createMapFromDocument(document);
+      assert.deepEqual(map, {
+        [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
+      });
+    });
+  });
 });

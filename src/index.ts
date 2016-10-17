@@ -6,6 +6,7 @@ import path = require('path');
 import { 
   parse,
   Document,
+  OperationDefinition,
 } from 'graphql';
 
 import {
@@ -15,7 +16,7 @@ import {
 // A map from a key (id or a hash) to a GraphQL document.
 // TODO fix the "any" here and replace with a GraphQL document type.
 export interface OutputMap {
-  [key: string]: Document;
+  [key: string]: OperationDefinition;
 }
 
 export class ExtractGQL {
@@ -71,15 +72,22 @@ export class ExtractGQL {
   }
 
   // Create an OutputMap from a GraphQL document that may contain
-  // queries, mutations and fragments.
+  // queries, mutations and fragments. 
   public createMapFromDocument(document: Document): OutputMap {
-      return {};
+    const queryDefinitions = getQueryDefinitions(document);
+    const result: OutputMap = {};
+    queryDefinitions.forEach((definition) => {
+      const queryKey = this.getQueryKey(definition);
+      result[queryKey] = definition;
+    });
+    return result;
   }
 
   public processGraphQLFile(graphQLFile: string): Promise<OutputMap> {
     return new Promise<OutputMap>((resolve, reject) => {
       ExtractGQL.readFile(graphQLFile).then((fileContents) => {
         const graphQLDocument = parse(fileContents);
+
         resolve(this.createMapFromDocument(graphQLDocument));
       }); 
     }); 
@@ -113,6 +121,12 @@ export class ExtractGQL {
     });
   }
 
+  // Returns a key for a query. Currently just uses JSON has a serialization
+  // mechanism; may use hashes or ids in the future.
+  public  getQueryKey(definition: OperationDefinition) {
+    return JSON.stringify(definition);
+  }
+  
   // Extracts GraphQL queries from this.inputFilePath and produces
   // an output JSON file in this.outputFilePath.
   public extract() {
