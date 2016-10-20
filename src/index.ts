@@ -3,14 +3,15 @@ import path = require('path');
 
 // TODO figure out how graphql-tag/parser is supposed to be imported
 // and use that instead of the graphql package.
-import { 
+import {
   parse,
   Document,
   OperationDefinition,
+  print,
 } from 'graphql';
 
 import {
-  getQueryDefinitions
+  getQueryDefinitions,
 } from './extractFromAST';
 
 // A map from a key (id or a hash) to a GraphQL document.
@@ -28,7 +29,7 @@ export class ExtractGQL {
   public static getFileExtension(filePath: string): string {
     const pieces = path.basename(filePath).split('.');
     if (pieces.length <= 1) {
-      return "";
+      return '';
     }
     return pieces[pieces.length - 1];
   }
@@ -37,8 +38,7 @@ export class ExtractGQL {
   public static readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
       fs.readFile(filePath, 'utf8', (err, data) => {
-        if(err) {
-          console.log('Error: ', err);
+        if (err) {
           reject(err);
         } else {
           resolve(data);
@@ -72,7 +72,7 @@ export class ExtractGQL {
   }
 
   // Create an OutputMap from a GraphQL document that may contain
-  // queries, mutations and fragments. 
+  // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
     const queryDefinitions = getQueryDefinitions(document);
     const result: OutputMap = {};
@@ -89,14 +89,14 @@ export class ExtractGQL {
         const graphQLDocument = parse(fileContents);
 
         resolve(this.createMapFromDocument(graphQLDocument));
-      }); 
-    }); 
+      });
+    });
   }
 
   public processInputFile(inputFile: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const extension = ExtractGQL.getFileExtension(inputFile);
-      switch(extension) {
+      switch (extension) {
         case 'graphql':
         this.processGraphQLFile(inputFile);
         break;
@@ -106,7 +106,7 @@ export class ExtractGQL {
         break;
       }
     });
-  } 
+  }
 
   // Processes an input path, which may be a path to a GraphQL file,
   // a TypeScript file or a Javascript file. Returns a map going from
@@ -121,12 +121,12 @@ export class ExtractGQL {
     });
   }
 
-  // Returns a key for a query. Currently just uses JSON has a serialization
+  // Returns a key for a query. Currently just uses GraphQL printing as a serialization
   // mechanism; may use hashes or ids in the future.
-  public  getQueryKey(definition: OperationDefinition) {
-    return JSON.stringify(definition);
+  public  getQueryKey(definition: OperationDefinition): string {
+    return print(definition);
   }
-  
+
   // Extracts GraphQL queries from this.inputFilePath and produces
   // an output JSON file in this.outputFilePath.
   public extract() {

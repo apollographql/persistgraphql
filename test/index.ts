@@ -36,7 +36,6 @@ describe('ExtractGQL', () => {
       assert.equal(ExtractGQL.getFileExtension('../../path/source.graphql'), 'graphql');
       assert.equal(ExtractGQL.getFileExtension('/some/complicated/path.with.dots/dots../view.js'), 'js');
     });
-    
     it('should return an empty string if the file has no extension', () => {
       assert.equal(ExtractGQL.getFileExtension('/redherring.graphql/file'), '');
       assert.equal(ExtractGQL.getFileExtension('file'), '');
@@ -62,7 +61,7 @@ describe('ExtractGQL', () => {
   });
 
   describe('createMapFromDocument', () => {
-    const egql = new ExtractGQL({ inputFilePath: "no_file.txt"});
+    const egql = new ExtractGQL({ inputFilePath: 'no_file.txt'});
 
     it('should be able to handle a document with no queries', () => {
       const document = gql`mutation something { otherThing }`;
@@ -77,6 +76,20 @@ describe('ExtractGQL', () => {
       const map = egql.createMapFromDocument(document);
       assert.deepEqual(map, {
         [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
+      });
+    });
+
+    it('should be able to handle a document with multiple queries', () => {
+      const document = gql`query author {
+        name
+      }
+      query person {
+        name
+      }`;
+      const map = egql.createMapFromDocument(document);
+      assert.deepEqual(map, {
+        [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
+        [egql.getQueryKey(document.definitions[1])]: document.definitions[1],
       });
     });
   });

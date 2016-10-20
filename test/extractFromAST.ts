@@ -40,7 +40,8 @@ describe('extractFromAST', () => {
       const queries = getQueryDefinitions(document);
       assert.equal(queries.length, 2);
       assert.equal(print(queries[0]), print(query1.definitions[0]));
-      assert.equal(print(queries[1]), print(query2.definitions[0]));
+      assert.equal(print(queries[1]), print(query2.definitions[0
+      ]));
     });
-  })
+  });
 });

@@ -6,11 +6,11 @@ import {
 
 // Checks if a given GraphQL definition is an operation definition (i.e. either query or mutation).
 export function isOperationDefinition(defn: Definition): defn is OperationDefinition {
-  return (defn.kind == 'OperationDefinition');
+  return (defn.kind === 'OperationDefinition');
 }
 
 export function isQueryDefinition(defn: Definition): defn is OperationDefinition {
-  return (isOperationDefinition(defn) && defn.operation == 'query');
+  return (isOperationDefinition(defn) && defn.operation === 'query');
 }
 
 // A set of utilities that operate on GraphQL documents
@@ -18,7 +18,7 @@ export function isQueryDefinition(defn: Definition): defn is OperationDefinition
 export function getQueryDefinitions(doc: Document): OperationDefinition[] {
   const queryDefinitions: OperationDefinition[] = [];
   doc.definitions.forEach((definition) => {
-    if(isQueryDefinition(definition)) {
+    if (isQueryDefinition(definition)) {
       queryDefinitions.push(definition);
     }
   });
