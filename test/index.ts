@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 const { assert } = chai;
 
-import { ExtractGQL } from '../src/index';
+import { ExtractGQL, OutputMap } from '../src/index';
 import { parse, print } from 'graphql';
 import gql from 'graphql-tag';
 
@@ -20,6 +20,11 @@ describe('ExtractGQL', () => {
         lastName
       }
     }`;
+  const egql = new ExtractGQL({ inputFilePath: 'not-real'});
+  const keys = [
+    egql.getQueryKey(queries.definitions[0]),
+    egql.getQueryKey(queries.definitions[1]),
+  ];
 
   it('should be able to construct an instance', () => {
     assert.doesNotThrow(() => {
@@ -69,8 +74,6 @@ describe('ExtractGQL', () => {
   });
 
   describe('createMapFromDocument', () => {
-    const egql = new ExtractGQL({ inputFilePath: 'no_file.txt'});
-
     it('should be able to handle a document with no queries', () => {
       const document = gql`mutation something { otherThing }`;
       const map = egql.createMapFromDocument(document);
@@ -104,10 +107,39 @@ describe('ExtractGQL', () => {
 
   describe('processGraphQLFile', () => {
     it('should be able to load a GraphQL file with multiple queries', (done) => {
-      const egql = new ExtractGQL({ inputFilePath: 'not-afile'});
       egql.processGraphQLFile('./test/fixtures/queries.graphql').then((documentMap) => {
         assert.equal(Object.keys(documentMap).length, 2);
         done();
+      });
+    });
+  });
+
+  describe('processInputFile', () => {
+    it('should not process a file with an unknown extension', (done) => {
+      egql.processInputFile('./test/fixtures/bad.c').then((documentMap) => {
+        done(new Error('Returned a result when it should not have.'));
+      }).catch((error) => {
+        assert(error);
+        done();
+      });
+    });
+
+    it('should correctly process a file with a .graphql extension', (done) => {
+      egql.processInputFile('./test/fixtures/queries.graphql').then((result: OutputMap) => {
+        assert.equal(Object.keys(result).length, 2);
+        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        done();
+      });
+    });
+  });
+
+  describe('processInputPath', () => {
+    it('should process a single file', () => {
+      egql.processInputPath('./test/fixtures/queries.graphql').then((result: OutputMap) => {
+        assert.equal(Object.keys(result).length, 2);
+        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
       });
     });
   });

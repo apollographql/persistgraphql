@@ -83,6 +83,8 @@ export class ExtractGQL {
     return result;
   }
 
+  // Given the path to a particular `.graphql` file, read it, extract the queries
+  // and return the promise to an OutputMap.
   public processGraphQLFile(graphQLFile: string): Promise<OutputMap> {
     return new Promise<OutputMap>((resolve, reject) => {
       ExtractGQL.readFile(graphQLFile).then((fileContents) => {
@@ -93,16 +95,16 @@ export class ExtractGQL {
     });
   }
 
-  public processInputFile(inputFile: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+  public processInputFile(inputFile: string): Promise<OutputMap> {
+    return new Promise<OutputMap>((resolve, reject) => {
       const extension = ExtractGQL.getFileExtension(inputFile);
       switch (extension) {
         case 'graphql':
-        this.processGraphQLFile(inputFile);
+        resolve(this.processGraphQLFile(inputFile));
         break;
 
         default:
-        resolve(false);
+        reject(new Error('Unknown exception given.'));
         break;
       }
     });
@@ -111,12 +113,14 @@ export class ExtractGQL {
   // Processes an input path, which may be a path to a GraphQL file,
   // a TypeScript file or a Javascript file. Returns a map going from
   // a hash to a query document.
-  public processInputPath(inputPath: string): Promise<boolean> {
-    return new Promise<void>((resolve, reject) => {
+  public processInputPath(inputPath: string): Promise<OutputMap> {
+    return new Promise<OutputMap>((resolve, reject) => {
       if (ExtractGQL.isDirectory(inputPath)) {
         // TODO recurse over the files in this directory
       } else {
-        this.processInputFile(inputPath);
+        this.processInputFile(inputPath).then((outputMap: OutputMap) => {
+          resolve(outputMap);
+        });
       }
     });
   }
