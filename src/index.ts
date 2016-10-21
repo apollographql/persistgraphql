@@ -14,6 +14,8 @@ import {
   getQueryDefinitions,
 } from './extractFromAST';
 
+import _ = require('lodash');
+
 // A map from a key (id or a hash) to a GraphQL document.
 // TODO fix the "any" here and replace with a GraphQL document type.
 export interface OutputMap {
@@ -115,13 +117,28 @@ export class ExtractGQL {
   // a hash to a query document.
   public processInputPath(inputPath: string): Promise<OutputMap> {
     return new Promise<OutputMap>((resolve, reject) => {
-      if (ExtractGQL.isDirectory(inputPath)) {
-        // TODO recurse over the files in this directory
-      } else {
-        this.processInputFile(inputPath).then((outputMap: OutputMap) => {
-          resolve(outputMap);
-        });
-      }
+      ExtractGQL.isDirectory(inputPath).then((isDirectory) => {
+        if (isDirectory) {
+          // Recurse over the files within this directory.
+          fs.readdir(inputPath, (err, items) => {
+            if (err) {
+              throw err;
+            }
+            const promises: Promise<OutputMap>[] = items.map((item) => {
+              return this.processInputPath(inputPath + '/' + item);
+            });
+
+            Promise.all(promises).then((resultMaps: OutputMap[]) => {
+              resolve(_.merge({} as OutputMap, ...resultMaps) as OutputMap);
+            });
+          });
+          // TODO recurse over the files in this directory
+        } else {
+          this.processInputFile(inputPath).then((outputMap: OutputMap) => {
+            resolve(outputMap);
+          });
+        }
+      });
     });
   }
 
@@ -129,6 +146,16 @@ export class ExtractGQL {
   // mechanism; may use hashes or ids in the future.
   public  getQueryKey(definition: OperationDefinition): string {
     return print(definition);
+  }
+
+  // Writes an OutputMap to a given file path.
+  public writeOutputMap(outputFilePath: string, outputMap: OutputMap): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      fs.writeFile(outputFilePath, JSON.stringify(outputMap), (err) => {
+        if (err) { reject(err); }
+        resolve();
+      });
+    });
   }
 
   // Extracts GraphQL queries from this.inputFilePath and produces

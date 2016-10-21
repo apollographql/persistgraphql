@@ -135,11 +135,21 @@ describe('ExtractGQL', () => {
   });
 
   describe('processInputPath', () => {
-    it('should process a single file', () => {
+    it('should process a single file', (done) => {
       egql.processInputPath('./test/fixtures/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
         assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
         assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        done();
+      });
+    });
+
+    it('should process a directory with a single file', (done) => {
+      egql.processInputPath('./test/fixtures').then((result: OutputMap) => {
+        assert.equal(Object.keys(result).length, 2);
+        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        done();
       });
     });
   });

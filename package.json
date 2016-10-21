@@ -33,5 +33,9 @@
     "tslint": "^3.15.1",
     "typed-graphql": "^1.0.2",
     "typescript": "^2.0.3"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.37",
+    "lodash": "^4.16.4"
   }
 }
