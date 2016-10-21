@@ -6,6 +6,21 @@ import { parse, print } from 'graphql';
 import gql from 'graphql-tag';
 
 describe('ExtractGQL', () => {
+  const queries = gql`
+    query {
+      author {
+        firstName
+        lastName
+      }
+    }
+
+    query otherQuery {
+      person {
+        firstName
+        lastName
+      }
+    }`;
+
   it('should be able to construct an instance', () => {
     assert.doesNotThrow(() => {
       new ExtractGQL({
@@ -47,14 +62,7 @@ describe('ExtractGQL', () => {
       const filePath = 'test/fixtures/queries.graphql';
       ExtractGQL.readFile(filePath).then((result) => {
         const graphQLString = print(parse(result));
-        assert.deepEqual(graphQLString, print(gql`
-          query {
-            author {
-              firstName
-              lastName
-            }
-          }
-        `));
+        assert.deepEqual(graphQLString, print(queries));
         done();
       });
     });
@@ -70,7 +78,7 @@ describe('ExtractGQL', () => {
     });
 
     it('should be able to handle a document with a single query', () => {
-      const document = gql`query author { 
+      const document = gql`query author {
         name
       }`;
       const map = egql.createMapFromDocument(document);
@@ -90,6 +98,16 @@ describe('ExtractGQL', () => {
       assert.deepEqual(map, {
         [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
         [egql.getQueryKey(document.definitions[1])]: document.definitions[1],
+      });
+    });
+  });
+
+  describe('processGraphQLFile', () => {
+    it('should be able to load a GraphQL file with multiple queries', (done) => {
+      const egql = new ExtractGQL({ inputFilePath: 'not-afile'});
+      egql.processGraphQLFile('./test/fixtures/queries.graphql').then((documentMap) => {
+        assert.equal(Object.keys(documentMap).length, 2);
+        done();
       });
     });
   });
