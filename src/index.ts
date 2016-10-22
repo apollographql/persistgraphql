@@ -149,11 +149,14 @@ export class ExtractGQL {
   }
 
   // Writes an OutputMap to a given file path.
-  public writeOutputMap(outputFilePath: string, outputMap: OutputMap): Promise<void> {
+  public writeOutputMap(outputMap: OutputMap, outputFilePath: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      fs.writeFile(outputFilePath, JSON.stringify(outputMap), (err) => {
-        if (err) { reject(err); }
-        resolve();
+      fs.open(outputFilePath, 'w+', (openErr, fd) => {
+        if (openErr) { reject(openErr); }
+        fs.write(fd, JSON.stringify(outputMap), (writeErr, written, str) => {
+          if (writeErr) { reject(writeErr); }
+          resolve();
+        });
       });
     });
   }

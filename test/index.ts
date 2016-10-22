@@ -153,4 +153,15 @@ describe('ExtractGQL', () => {
       });
     });
   });
+
+  describe('writeOutputMap', () => {
+    it('should write be able to write an OutputMap to a file', (done) => {
+      const outputMap = egql.createMapFromDocument(queries);
+      egql.writeOutputMap(outputMap, './test/output_tests/output.graphql').then(() => {
+        done();
+      }).catch((err) => {
+        done(err);
+      });
+    });
+  });
 });
