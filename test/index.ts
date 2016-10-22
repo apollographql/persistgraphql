@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 const { assert } = chai;
 
-import { ExtractGQL, OutputMap } from '../src/index';
+import { ExtractGQL, OutputMap } from '../src/ExtractGQL';
 import { parse, print } from 'graphql';
 import gql from 'graphql-tag';
 
@@ -155,7 +155,7 @@ describe('ExtractGQL', () => {
   });
 
   describe('writeOutputMap', () => {
-    it('should write be able to write an OutputMap to a file', (done) => {
+    it('should be able to write an OutputMap to a file', (done) => {
       const outputMap = egql.createMapFromDocument(queries);
       egql.writeOutputMap(outputMap, './test/output_tests/output.graphql').then(() => {
         done();
