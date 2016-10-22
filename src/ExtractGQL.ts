@@ -1,8 +1,6 @@
 import fs = require('fs');
 import path = require('path');
 
-// TODO figure out how graphql-tag/parser is supposed to be imported
-// and use that instead of the graphql package.
 import {
   parse,
   Document,
@@ -178,7 +176,7 @@ export const main = (args: string[]) => {
   let outputFilePath: string;
 
   if (args.length < 1) {
-    console.log('Usage: extractgql input_file [output file]');
+    console.log('Usage: extractgql input_file [output_file]');
   } else if (args.length === 1) {
     inputFilePath = args[0];
   } else {

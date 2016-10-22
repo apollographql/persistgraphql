@@ -1,6 +1,6 @@
 {
   "name": "extractgql",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A build tool for GraphQL projects.",
   "main": "dist/index.js",
   "scripts": {
@@ -20,6 +20,9 @@
     "url": "https://github.com/Poincare/apollo-query-whitelisting/issues"
   },
   "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
+  "bin": {
+    "extractgql": "./lib/src/index.js"
+  },
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.32",
