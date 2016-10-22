@@ -71,14 +71,20 @@ export class ExtractGQL {
     this.outputFilePath = outputFilePath;
   }
 
+  // TODO add query transformers here
+  public applyQueryTransformers(queryDefinition: OperationDefinition): OperationDefinition {
+    return queryDefinition;
+  }
+
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
     const queryDefinitions = getQueryDefinitions(document);
     const result: OutputMap = {};
     queryDefinitions.forEach((definition) => {
-      const queryKey = this.getQueryKey(definition);
-      result[queryKey] = definition;
+      const transformedQuery = this.applyQueryTransformers(definition);
+      const queryKey = this.getQueryKey(transformedQuery);
+      result[queryKey] = transformedQuery;
     });
     return result;
   }
