@@ -81,26 +81,37 @@ describe('ExtractGQL', () => {
     });
 
     it('should be able to handle a document with a single query', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'nothing' });
       const document = gql`query author {
         name
       }`;
-      const map = egql.createMapFromDocument(document);
+      const map = myegql.createMapFromDocument(document);
       assert.deepEqual(map, {
-        [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
+        [egql.getQueryKey(document.definitions[0])]: {
+          transformedQuery: document.definitions[0],
+          id: 1,
+        },
       });
     });
 
     it('should be able to handle a document with multiple queries', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       const document = gql`query author {
         name
       }
       query person {
         name
       }`;
-      const map = egql.createMapFromDocument(document);
+      const map = myegql.createMapFromDocument(document);
       assert.deepEqual(map, {
-        [egql.getQueryKey(document.definitions[0])]: document.definitions[0],
-        [egql.getQueryKey(document.definitions[1])]: document.definitions[1],
+        [egql.getQueryKey(document.definitions[0])]: {
+          transformedQuery: document.definitions[0],
+          id: 1,
+        },
+        [egql.getQueryKey(document.definitions[1])]: {
+          transformedQuery: document.definitions[1],
+          id: 2,
+        },
       });
     });
   });
@@ -127,8 +138,8 @@ describe('ExtractGQL', () => {
     it('should correctly process a file with a .graphql extension', (done) => {
       egql.processInputFile('./test/fixtures/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
         done();
       });
     });
@@ -138,8 +149,8 @@ describe('ExtractGQL', () => {
     it('should process a single file', (done) => {
       egql.processInputPath('./test/fixtures/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
         done();
       });
     });
@@ -147,8 +158,8 @@ describe('ExtractGQL', () => {
     it('should process a directory with a single file', (done) => {
       egql.processInputPath('./test/fixtures').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]]), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]]), print(queries.definitions[1]));
+        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
+        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
         done();
       });
     });

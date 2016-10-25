@@ -17,12 +17,18 @@ import _ = require('lodash');
 // A map from a key (id or a hash) to a GraphQL document.
 // TODO fix the "any" here and replace with a GraphQL document type.
 export interface OutputMap {
-  [key: string]: OperationDefinition;
+  [key: string]: TransformedQueryWithId;
+}
+
+export interface TransformedQueryWithId {
+  transformedQuery: OperationDefinition;
+  id: number | string;
 }
 
 export class ExtractGQL {
   public inputFilePath: string;
   public outputFilePath: string;
+  public queryId: number = 0;
 
   // Given a file path, this returns the extension of the file within the
   // file path.
@@ -84,7 +90,10 @@ export class ExtractGQL {
     queryDefinitions.forEach((definition) => {
       const transformedQuery = this.applyQueryTransformers(definition);
       const queryKey = this.getQueryKey(transformedQuery);
-      result[queryKey] = transformedQuery;
+      result[queryKey] = {
+        transformedQuery,
+        id: this.getQueryId(),
+      };
     });
     return result;
   }
@@ -150,6 +159,12 @@ export class ExtractGQL {
   // mechanism; may use hashes or ids in the future.
   public  getQueryKey(definition: OperationDefinition): string {
     return print(definition);
+  }
+
+  // Returns unique query ids.
+  public getQueryId() {
+    this.queryId += 1;
+    return this.queryId;
   }
 
   // Writes an OutputMap to a given file path.
