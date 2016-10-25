@@ -1,8 +1,8 @@
 {
   "name": "extractgql",
-  "version": "0.0.2",
+  "version": "0.0.8",
   "description": "A build tool for GraphQL projects.",
-  "main": "dist/index.js",
+  "main": "lib/src/index.js",
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
@@ -21,9 +21,9 @@
   },
   "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
   "bin": {
-    "extractgql": "./lib/src/index.js"
+    "extractgql": "./bin/extractgql"
   },
-  "devDependencies": {
+  "dependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.45",
@@ -35,9 +35,7 @@
     "source-map-support": "^0.4.3",
     "tslint": "^3.15.1",
     "typed-graphql": "^1.0.2",
-    "typescript": "^2.0.3"
-  },
-  "dependencies": {
+    "typescript": "^2.0.3",
     "@types/lodash": "^4.14.37",
     "lodash": "^4.16.4"
   }

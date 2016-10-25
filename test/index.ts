@@ -158,11 +158,9 @@ describe('ExtractGQL', () => {
   });
 
   describe('processInputFile', () => {
-    it('should not process a file with an unknown extension', (done) => {
+    it('should return an empty map on a file with an unknown extension', (done) => {
       egql.processInputFile('./test/fixtures/bad.c').then((documentMap) => {
-        done(new Error('Returned a result when it should not have.'));
-      }).catch((error) => {
-        assert(error);
+        assert.deepEqual(documentMap, {});
         done();
       });
     });

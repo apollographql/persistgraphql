@@ -15,8 +15,7 @@ import {
 import _ = require('lodash');
 
 // A map from a key (id or a hash) to a GraphQL document.
-// TODO fix the "any" here and replace with a GraphQL document type.
-export interface OutputMap {
+  export interface OutputMap {
   [key: string]: TransformedQueryWithId;
 }
 
@@ -136,7 +135,7 @@ export class ExtractGQL {
         break;
 
         default:
-        reject(new Error('Unknown exception given.'));
+        resolve({});
         break;
       }
     });
@@ -149,6 +148,7 @@ export class ExtractGQL {
     return new Promise<OutputMap>((resolve, reject) => {
       ExtractGQL.isDirectory(inputPath).then((isDirectory) => {
         if (isDirectory) {
+          console.log(`Crawling ${inputPath}...`);
           // Recurse over the files within this directory.
           fs.readdir(inputPath, (err, items) => {
             if (err) {
