@@ -25,10 +25,18 @@ export interface TransformedQueryWithId {
   id: number | string;
 }
 
+export type QueryTransformer = (doc: OperationDefinition) => OperationDefinition;
+
 export class ExtractGQL {
   public inputFilePath: string;
   public outputFilePath: string;
+
+  // Starting point for monotonically increasing query ids.
   public queryId: number = 0;
+
+  // List of query transformers that a query is put through (left to right)
+  // before being written as a transformedQuery within the OutputMap.
+  public queryTransformers: QueryTransformer[] = [];
 
   // Given a file path, this returns the extension of the file within the
   // file path.
@@ -77,9 +85,18 @@ export class ExtractGQL {
     this.outputFilePath = outputFilePath;
   }
 
-  // TODO add query transformers here
+  // Apply this.queryTransformers to a query definition.
   public applyQueryTransformers(queryDefinition: OperationDefinition): OperationDefinition {
-    return queryDefinition;
+    let currentDefinition = queryDefinition;
+    this.queryTransformers.forEach((transformer) => {
+      currentDefinition = transformer(currentDefinition);
+    });
+    return currentDefinition;
+  }
+
+  // Add a query transformer to the end of the list of query transformers.
+  public addQueryTransformer(queryTransformer: QueryTransformer) {
+    this.queryTransformers.push(queryTransformer);
   }
 
   // Create an OutputMap from a GraphQL document that may contain
@@ -88,8 +105,8 @@ export class ExtractGQL {
     const queryDefinitions = getQueryDefinitions(document);
     const result: OutputMap = {};
     queryDefinitions.forEach((definition) => {
+      const queryKey = this.getQueryKey(definition);
       const transformedQuery = this.applyQueryTransformers(definition);
-      const queryKey = this.getQueryKey(transformedQuery);
       result[queryKey] = {
         transformedQuery,
         id: this.getQueryId(),

@@ -2,7 +2,7 @@ import * as chai from 'chai';
 const { assert } = chai;
 
 import { ExtractGQL, OutputMap } from '../src/ExtractGQL';
-import { parse, print } from 'graphql';
+import { parse, print, OperationDefinition } from 'graphql';
 import gql from 'graphql-tag';
 
 describe('ExtractGQL', () => {
@@ -111,6 +111,38 @@ describe('ExtractGQL', () => {
         [egql.getQueryKey(document.definitions[1])]: {
           transformedQuery: document.definitions[1],
           id: 2,
+        },
+      });
+    });
+  });
+
+  describe('queryTransformers', () => {
+    it('should be able to transform a document before writing it to the output map', () => {
+      const originalDocument = gql`
+        query {
+          author {
+            firstName
+            lastName
+          }
+        }
+      `;
+      const newDocument = gql`
+        query {
+          person {
+            name
+          }
+        }
+      `;
+      const queryTransformer = (queryDef: OperationDefinition) => {
+        return newDocument.definitions[0];
+      };
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
+      myegql.addQueryTransformer(queryTransformer);
+      const map = myegql.createMapFromDocument(originalDocument);
+      assert.deepEqual(map, {
+        [egql.getQueryKey(originalDocument.definitions[0])]: {
+          id: 1,
+          transformedQuery: newDocument.definitions[0],
         },
       });
     });
