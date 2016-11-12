@@ -172,7 +172,22 @@ export class ExtractGQL {
     });
   }
 
-  // Returns a key for a query. Currently just uses GraphQL printing as a serialization
+  // Takes a document and a query definition contained within that document. Then, extracts the
+  // fragments that the query depends on from the document and returns a document with these
+  // fragments and the specified query.
+  public trimDocumentForQuery(document: Document, queryDefinition: OperationDefinition): Document {
+
+    return null;
+  }
+
+  // Returns a key for a document definition. Should include exactly one query and a set of
+  // fragments that the query references. Currently just uses GraphQL printing as a serialization
+  // mechanism; may use hashes or ids in the future.
+  public getQueryDocumentKey(queryDocument: Document): string {
+    return print(queryDocument);
+  }
+
+  // Returns a key for a query operation definition. Currently just uses GraphQL printing as a serialization
   // mechanism; may use hashes or ids in the future.
   public  getQueryKey(definition: OperationDefinition): string {
     return print(definition);

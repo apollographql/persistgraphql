@@ -1,11 +1,67 @@
 import * as chai from 'chai';
 const { assert } = chai;
 
-import { getQueryDefinitions } from '../src/extractFromAST';
+import {
+  getQueryDefinitions,
+  getFragmentNames,
+} from '../src/extractFromAST';
 import gql from 'graphql-tag';
 import { print } from 'graphql';
 
 describe('extractFromAST', () => {
+  describe('getFragmentNames', () => {
+    it('should extract the fragment names from top level references', () => {
+      const document = gql`
+        query {
+          ...rootDetails
+          ...otherRootDetails
+        }
+        fragment rootDetails on RootQuery {
+          author {
+            firstName
+            lastName
+          }
+        }
+        fragment otherRootDetails on RootQuery {
+          author {
+            firstName
+            lastName
+          }
+        }
+        `;
+      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet);
+      assert.deepEqual(fragmentNames, {
+        'rootDetails': 1,
+        'otherRootDetails': 1,
+      });
+    });
+
+    it('should extract the fragment names from deep references', () => {
+      const document = gql`
+        query {
+          author {
+            name {
+              ...nameInfo
+            }
+            ...generalAuthorInfo
+          }
+        }
+        fragment nameInfo on Name {
+          firstName
+          lastName
+        }
+        fragment generalAuthorInfo on Author {
+          age
+        }
+      `;
+      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet);
+      assert.deepEqual(fragmentNames, {
+        nameInfo: 1,
+        generalAuthorInfo: 1,
+      });
+    });
+  });
+
   describe('getQueryDefinitions', () => {
     it('should extract query definitions out of a document containing multiple queries', () => {
       const document = gql`

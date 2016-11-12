@@ -94,6 +94,21 @@ describe('ExtractGQL', () => {
       });
     });
 
+    it('should be able to handle a document with fragments', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' })
+      const document = gql`
+        query authorList {
+          author {
+            ...authorDetails
+          }
+        }
+        fragment authorDetails on Author {
+          firstName
+          lastName
+        }
+      `;
+    });
+
     it('should be able to handle a document with multiple queries', () => {
       const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       const document = gql`query author {
