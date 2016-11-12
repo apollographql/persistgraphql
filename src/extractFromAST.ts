@@ -7,6 +7,7 @@ import {
   FragmentSpread,
   Field,
   InlineFragment,
+  FragmentDefinition,
 } from 'graphql';
 
 import _ = require('lodash');
@@ -19,6 +20,11 @@ export function isOperationDefinition(defn: Definition): defn is OperationDefini
 // Checks if a given GraphQL selection is a FragmentSpread.
 export function isFragmentSpread(selection: Selection): selection is FragmentSpread {
   return (selection.kind == 'FragmentSpread');
+}
+
+// Checks if a given GraphQL definition is a FragmentDefinition.
+export function isFragmentDefinition(selection: Definition): selection is FragmentDefinition {
+  return (selection.kind == 'FragmentDefinition');
 }
 
 // Checks if a given GraphQL selection is a Field.
@@ -35,8 +41,7 @@ export function isQueryDefinition(defn: Definition): defn is OperationDefinition
   return (isOperationDefinition(defn) && defn.operation === 'query');
 }
 
-// A set of utilities that operate on GraphQL documents
-// and let us extract stuff from these documents.
+// Get query definitions from query document.
 export function getQueryDefinitions(doc: Document): OperationDefinition[] {
   const queryDefinitions: OperationDefinition[] = [];
   doc.definitions.forEach((definition) => {
@@ -47,13 +52,36 @@ export function getQueryDefinitions(doc: Document): OperationDefinition[] {
   return queryDefinitions;
 }
 
-export function getFragmentNames(selectionSet: SelectionSet): { [name: string]: number } {
+// Extracts the names of fragments from a SelectionSet recursively, given a document in which
+// each of the fragments defined are given. Returns a map going from
+// the name of fragment to the integer "1" to support O(1) lookups.
+export function getFragmentNames(selectionSet: SelectionSet, document: Document): {
+  [name: string]: number,
+} {
+  if (!selectionSet) {
+    return {};
+  }
+
+  // Construct a map going from the name of a fragment to the definition of the fragment.
+  const fragmentDefinitions: { [name: string]: FragmentDefinition } = {};
+  document.definitions.forEach((definition) => {
+    if(isFragmentDefinition(definition)) {
+      fragmentDefinitions[definition.name.value] = definition;
+    }
+  });
+
   let fragmentNames: { [name: string]: number } = {};
   selectionSet.selections.forEach((selection) => {
+    // If we encounter a fragment spread, we look inside it to unravel more fragment names.
     if (isFragmentSpread(selection)) {
       fragmentNames[selection.name.value] = 1;
+      const innerFragmentNames = getFragmentNames(
+        fragmentDefinitions[selection.name.value].selectionSet,
+        document
+      );
+      fragmentNames = _.merge(fragmentNames, innerFragmentNames);
     } else if(isInlineFragment(selection) || isField(selection)) {
-      const innerFragmentNames = getFragmentNames(selection.selectionSet);
+      const innerFragmentNames = getFragmentNames(selection.selectionSet, document);
       fragmentNames = _.merge(fragmentNames, innerFragmentNames);
     }
   });

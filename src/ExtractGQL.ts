@@ -6,10 +6,13 @@ import {
   Document,
   OperationDefinition,
   print,
+  Definition,
 } from 'graphql';
 
 import {
   getQueryDefinitions,
+  getFragmentNames,
+  isFragmentDefinition,
 } from './extractFromAST';
 
 import _ = require('lodash');
@@ -174,10 +177,20 @@ export class ExtractGQL {
 
   // Takes a document and a query definition contained within that document. Then, extracts the
   // fragments that the query depends on from the document and returns a document with these
-  // fragments and the specified query.
+  // fragments and the specified query definition (note that the query definition must be the
+  // reference to the query definition contained with the document structure). Input document
+  // may be mutated.
   public trimDocumentForQuery(document: Document, queryDefinition: OperationDefinition): Document {
-
-    return null;
+    const queryFragmentNames = getFragmentNames(queryDefinition.selectionSet, document);
+    const retDocument: Document = {
+      kind: 'Document',
+      definitions: [],
+    };
+    retDocument.definitions = document.definitions.filter((definition: Definition) => {
+      return ((isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] == 1)
+              || definition === queryDefinition);
+    });
+    return retDocument;
   }
 
   // Returns a key for a document definition. Should include exactly one query and a set of

@@ -29,7 +29,7 @@ describe('extractFromAST', () => {
           }
         }
         `;
-      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet);
+      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet, document);
       assert.deepEqual(fragmentNames, {
         'rootDetails': 1,
         'otherRootDetails': 1,
@@ -54,10 +54,36 @@ describe('extractFromAST', () => {
           age
         }
       `;
-      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet);
+      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet, document);
       assert.deepEqual(fragmentNames, {
         nameInfo: 1,
         generalAuthorInfo: 1,
+      });
+    });
+
+    it('should extract fragment names referenced in fragments', () => {
+      const document = gql`
+        query {
+          author {
+            name {
+              ...nameInfo
+            }
+          }
+        }
+        fragment nameInfo on Name {
+          firstName
+          ...otherNameInfo
+        }
+        fragment otherNameInfo on Name {
+          otherThing {
+            lastName
+          }
+        }
+      `;
+      const fragmentNames = getFragmentNames(document.definitions[0].selectionSet, document);
+      assert.deepEqual(fragmentNames, {
+        nameInfo: 1,
+        otherNameInfo: 1,
       });
     });
   });
