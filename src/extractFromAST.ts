@@ -41,6 +41,14 @@ export function isQueryDefinition(defn: Definition): defn is OperationDefinition
   return (isOperationDefinition(defn) && defn.operation === 'query');
 }
 
+// Creates a query document out of a single query operation definition.
+export function createDocumentFromQuery(definition: OperationDefinition) {
+  return {
+    kind: 'Document',
+    definitions: [ definition ],
+  };
+}
+
 // Get query definitions from query document.
 export function getQueryDefinitions(doc: Document): OperationDefinition[] {
   const queryDefinitions: OperationDefinition[] = [];

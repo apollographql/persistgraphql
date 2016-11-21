@@ -1,7 +1,13 @@
 import * as chai from 'chai';
 const { assert } = chai;
 
-import { ExtractGQL, OutputMap } from '../src/ExtractGQL';
+import {
+  createDocumentFromQuery,
+} from '../src/extractFromAST';
+import {
+  ExtractGQL,
+  OutputMap,
+} from '../src/ExtractGQL';
 import { parse, print, OperationDefinition } from 'graphql';
 import gql from 'graphql-tag';
 
@@ -88,7 +94,7 @@ describe('ExtractGQL', () => {
       const map = myegql.createMapFromDocument(document);
       assert.deepEqual(map, {
         [egql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: document.definitions[0],
+          transformedQuery: document,
           id: 1,
         },
       });
@@ -107,6 +113,7 @@ describe('ExtractGQL', () => {
           lastName
         }
       `;
+      // TODO
     });
 
     it('should be able to handle a document with multiple queries', () => {
@@ -120,11 +127,11 @@ describe('ExtractGQL', () => {
       const map = myegql.createMapFromDocument(document);
       assert.deepEqual(map, {
         [egql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: document.definitions[0],
+          transformedQuery: createDocumentFromQuery(document.definitions[0]),
           id: 1,
         },
         [egql.getQueryKey(document.definitions[1])]: {
-          transformedQuery: document.definitions[1],
+          transformedQuery: createDocumentFromQuery(document.definitions[1]),
           id: 2,
         },
       });
@@ -154,10 +161,11 @@ describe('ExtractGQL', () => {
       const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       myegql.addQueryTransformer(queryTransformer);
       const map = myegql.createMapFromDocument(originalDocument);
+
       assert.deepEqual(map, {
         [egql.getQueryKey(originalDocument.definitions[0])]: {
           id: 1,
-          transformedQuery: newDocument.definitions[0],
+          transformedQuery: createDocumentFromQuery(newDocument.definitions[0]),
         },
       });
     });
@@ -183,8 +191,14 @@ describe('ExtractGQL', () => {
     it('should correctly process a file with a .graphql extension', (done) => {
       egql.processInputFile('./test/fixtures/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
+        assert.equal(
+          print(result[keys[0]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[0]))
+        );
+        assert.equal(
+          print(result[keys[1]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[1]))
+        );
         done();
       });
     });
@@ -194,8 +208,14 @@ describe('ExtractGQL', () => {
     it('should process a single file', (done) => {
       egql.processInputPath('./test/fixtures/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
+        assert.equal(
+          print(result[keys[0]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[0]))
+        );
+        assert.equal(
+          print(result[keys[1]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[1]))
+        );
         done();
       });
     });
@@ -203,8 +223,14 @@ describe('ExtractGQL', () => {
     it('should process a directory with a single file', (done) => {
       egql.processInputPath('./test/fixtures').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(print(result[keys[0]].transformedQuery), print(queries.definitions[0]));
-        assert.equal(print(result[keys[1]].transformedQuery), print(queries.definitions[1]));
+        assert.equal(
+          print(result[keys[0]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[0]))
+        );
+        assert.equal(
+          print(result[keys[1]].transformedQuery),
+          print(createDocumentFromQuery(queries.definitions[1]))
+        );
         done();
       });
     });

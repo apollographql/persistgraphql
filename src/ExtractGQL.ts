@@ -18,12 +18,12 @@ import {
 import _ = require('lodash');
 
 // A map from a key (id or a hash) to a GraphQL document.
-  export interface OutputMap {
+export interface OutputMap {
   [key: string]: TransformedQueryWithId;
 }
 
 export interface TransformedQueryWithId {
-  transformedQuery: OperationDefinition;
+  transformedQuery: Document;
   id: number | string;
 }
 
@@ -109,8 +109,11 @@ export class ExtractGQL {
     queryDefinitions.forEach((definition) => {
       const queryKey = this.getQueryKey(definition);
       const transformedQuery = this.applyQueryTransformers(definition);
+      const transformedQueryWithFragments = this.getQueryFragments(document, transformedQuery);
+      transformedQueryWithFragments.definitions.push(transformedQuery);
+
       result[queryKey] = {
-        transformedQuery,
+        transformedQuery: transformedQueryWithFragments,
         id: this.getQueryId(),
       };
     });
@@ -175,6 +178,21 @@ export class ExtractGQL {
     });
   }
 
+  // Takes a document and a query definition contained within that document. Then, extracts
+  // the fragments that the query depends on from the document and returns a document containing
+  // only those fragments.
+  public getQueryFragments(document: Document, queryDefinition: OperationDefinition): Document {
+    const queryFragmentNames = getFragmentNames(queryDefinition.selectionSet, document);
+    const retDocument: Document = {
+      kind: 'Document',
+      definitions: [],
+    };
+    retDocument.definitions = document.definitions.filter((definition: Definition) => {
+      return (isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] == 1);
+    });
+    return retDocument;
+  }
+
   // Takes a document and a query definition contained within that document. Then, extracts the
   // fragments that the query depends on from the document and returns a document with these
   // fragments and the specified query definition (note that the query definition must be the
@@ -193,16 +211,16 @@ export class ExtractGQL {
     return retDocument;
   }
 
-  // Returns a key for a document definition. Should include exactly one query and a set of
-  // fragments that the query references. Currently just uses GraphQL printing as a serialization
+  // Returns a key for a query in a document definition. Should include exactly one query and a set
+  // of fragments that the query references. Currently just uses GraphQL printing as a serialization
   // mechanism; may use hashes or ids in the future.
-  public getQueryDocumentKey(queryDocument: Document): string {
-    return print(queryDocument);
+  public getQueryDocumentKey(document: Document, definition: OperationDefinition): string {
+    return print(this.trimDocumentForQuery(document, definition));
   }
 
   // Returns a key for a query operation definition. Currently just uses GraphQL printing as a serialization
   // mechanism; may use hashes or ids in the future.
-  public  getQueryKey(definition: OperationDefinition): string {
+  public getQueryKey(definition: OperationDefinition): string {
     return print(definition);
   }
 
