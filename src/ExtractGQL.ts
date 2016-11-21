@@ -110,7 +110,7 @@ export class ExtractGQL {
       const queryKey = this.getQueryKey(definition);
       const transformedQuery = this.applyQueryTransformers(definition);
       const transformedQueryWithFragments = this.getQueryFragments(document, transformedQuery);
-      transformedQueryWithFragments.definitions.push(transformedQuery);
+      transformedQueryWithFragments.definitions.unshift(transformedQuery);
 
       result[queryKey] = {
         transformedQuery: transformedQueryWithFragments,

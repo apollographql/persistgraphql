@@ -100,7 +100,7 @@ describe('ExtractGQL', () => {
       });
     });
 
-    it('should be able to handle a document with fragments', () => {
+    it('should be able to handle a document with a fragment', () => {
       const myegql = new ExtractGQL({ inputFilePath: 'empty' })
       const document = gql`
         query authorList {
@@ -113,7 +113,104 @@ describe('ExtractGQL', () => {
           lastName
         }
       `;
-      // TODO
+      const map = myegql.createMapFromDocument(document);
+
+      assert.deepEqual(map, {
+        [myegql.getQueryKey(document.definitions[0])]: {
+          transformedQuery: document,
+          id: 1,
+        },
+      });
+    });
+
+    it('should be able to handle a document with multiple fragments', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
+      const document = gql`
+        query authorList {
+          author {
+            ...authorDetails
+            ...otherDetails
+          }
+        }
+        fragment authorDetails on Author {
+          firstName
+          lastName
+        }
+        fragment otherDetails on Author {
+          author
+        }`;
+      const map = myegql.createMapFromDocument(document);
+      const key = myegql.getQueryKey(document.definitions[0]);
+      assert.equal(print(map[key].transformedQuery), print(document));
+    });
+
+    it('should be able to handle a document with unused fragments', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
+      const document = gql`
+        query authorList {
+          author {
+            firstName
+            lastName
+          }
+        }
+        fragment pointlessFragment on Author {
+          firstName
+          lastName
+        }
+      `;
+      const map = egql.createMapFromDocument(document);
+      const key = myegql.getQueryKey(document.definitions[0]);
+      assert.equal(
+        print(map[key].transformedQuery),
+        print(createDocumentFromQuery(document.definitions[0]))
+      );
+    });
+
+    it('should be able to handle a document with multiple queries sharing a fragment', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
+      const document = gql`
+        query authorList {
+          author {
+            ...authorDetails
+          }
+        }
+        query authorInfo {
+          author {
+            ...authorDetails
+          }
+        }
+        fragment authorDetails on Author {
+          firstName
+          lastName
+        }
+      `;
+      const authorList = gql`
+        query authorList {
+          author {
+            ...authorDetails
+          }
+        }
+        fragment authorDetails on Author {
+          firstName
+          lastName
+        }
+      `;
+      const authorInfo = gql`
+        query authorInfo {
+          author {
+            ...authorDetails
+          }
+        }
+        fragment authorDetails on Author {
+          firstName
+          lastName
+        }
+      `;
+      const map = myegql.createMapFromDocument(document);
+      const key1 = myegql.getQueryKey(document.definitions[0]);
+      const key2 = myegql.getQueryKey(document.definitions[1]);
+      assert.equal(print(map[key1].transformedQuery), print(authorList));
+      assert.equal(print(map[key2].transformedQuery), print(authorInfo));
     });
 
     it('should be able to handle a document with multiple queries', () => {
