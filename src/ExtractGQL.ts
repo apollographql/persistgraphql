@@ -188,7 +188,7 @@ export class ExtractGQL {
       definitions: [],
     };
     retDocument.definitions = document.definitions.filter((definition: Definition) => {
-      return (isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] == 1);
+      return (isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] === 1);
     });
     return retDocument;
   }
@@ -205,7 +205,7 @@ export class ExtractGQL {
       definitions: [],
     };
     retDocument.definitions = document.definitions.filter((definition: Definition) => {
-      return ((isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] == 1)
+      return ((isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] === 1)
               || definition === queryDefinition);
     });
     return retDocument;

@@ -101,7 +101,7 @@ describe('ExtractGQL', () => {
     });
 
     it('should be able to handle a document with a fragment', () => {
-      const myegql = new ExtractGQL({ inputFilePath: 'empty' })
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       const document = gql`
         query authorList {
           author {

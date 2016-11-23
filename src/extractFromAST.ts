@@ -19,22 +19,22 @@ export function isOperationDefinition(defn: Definition): defn is OperationDefini
 
 // Checks if a given GraphQL selection is a FragmentSpread.
 export function isFragmentSpread(selection: Selection): selection is FragmentSpread {
-  return (selection.kind == 'FragmentSpread');
+  return (selection.kind === 'FragmentSpread');
 }
 
 // Checks if a given GraphQL definition is a FragmentDefinition.
 export function isFragmentDefinition(selection: Definition): selection is FragmentDefinition {
-  return (selection.kind == 'FragmentDefinition');
+  return (selection.kind === 'FragmentDefinition');
 }
 
 // Checks if a given GraphQL selection is a Field.
 export function isField(selection: Selection): selection is Field {
-  return (selection.kind == 'Field');
+  return (selection.kind === 'Field');
 }
 
 // Checks if a given GraphQL selection is an InlineFragment.
 export function isInlineFragment(selection: Selection): selection is InlineFragment {
-  return (selection.kind == 'InlineFragment');
+  return (selection.kind === 'InlineFragment');
 }
 
 export function isQueryDefinition(defn: Definition): defn is OperationDefinition {
@@ -73,7 +73,7 @@ export function getFragmentNames(selectionSet: SelectionSet, document: Document)
   // Construct a map going from the name of a fragment to the definition of the fragment.
   const fragmentDefinitions: { [name: string]: FragmentDefinition } = {};
   document.definitions.forEach((definition) => {
-    if(isFragmentDefinition(definition)) {
+    if (isFragmentDefinition(definition)) {
       fragmentDefinitions[definition.name.value] = definition;
     }
   });
@@ -88,7 +88,7 @@ export function getFragmentNames(selectionSet: SelectionSet, document: Document)
         document
       );
       fragmentNames = _.merge(fragmentNames, innerFragmentNames);
-    } else if(isInlineFragment(selection) || isField(selection)) {
+    } else if (isInlineFragment(selection) || isField(selection)) {
       const innerFragmentNames = getFragmentNames(selection.selectionSet, document);
       fragmentNames = _.merge(fragmentNames, innerFragmentNames);
     }
