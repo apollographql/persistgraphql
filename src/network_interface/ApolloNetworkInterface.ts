@@ -1,11 +1,14 @@
 import {
   createNetworkInterface,
-  NetworkInterface,
-  HTTPFetchNetworkInterface,
-  RequestAndOptions,
   ObservableQuery,
   Request,
 } from 'apollo-client';
+
+import {
+  NetworkInterface,
+  HTTPFetchNetworkInterface,
+  RequestAndOptions,
+} from 'apollo-client/transport/networkInterface';
 
 import { OutputMap } from '../ExtractGQL';
 import { getQueryDefinitions } from '../extractFromAST';
@@ -55,7 +58,7 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
       body: JSON.stringify(serverRequest),
       method: 'POST',
     }, options, {
-      headers: assign({}, {
+      headers: _.assign({}, {
         Accept: '*/*',
         'Content-Type': 'application/json',
       }, options.headers),
