@@ -38,5 +38,8 @@
     "typescript": "^2.0.3",
     "@types/lodash": "^4.14.37",
     "lodash": "^4.16.4"
+  },
+  "devDependencies": {
+    "apollo-client": "^0.5.6"
   }
 }
