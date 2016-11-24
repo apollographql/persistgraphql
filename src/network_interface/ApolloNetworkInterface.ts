@@ -50,10 +50,12 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
 
     const mockEGQL = new ExtractGQL({ inputFilePath: "" });
     const queryKey = mockEGQL.getQueryKey(queryDefinitions[0]);
+    if (!this.queryMap[queryKey]) {
+      throw new Error('Could not find query inside query map.');
+    }
     const serverRequest = {
       id: this.queryMap[queryKey].id,
     };
-
     return fetch(this._uri, _.assign({}, this._opts, {
       body: JSON.stringify(serverRequest),
       method: 'POST',
