@@ -2,10 +2,15 @@ import * as chai from 'chai';
 const { assert } = chai;
 
 import gql from 'graphql-tag';
+import * as fetchMock from 'fetch-mock';
 
 import {
   PersistedQueryNetworkInterface,
 } from '../../src/network_interface/ApolloNetworkInterface';
+
+import {
+  ExtractGQL,
+} from '../../src/ExtractGQL';
 
 describe('PersistedQueryNetworkInterface', () => {
   it('should construct itself', () => {
@@ -69,6 +74,81 @@ describe('PersistedQueryNetworkInterface', () => {
       assert(err);
       assert.include(err.message, 'Multiple queries');
       done();
+    });
+  });
+
+  describe('sending query ids', () => {
+    const egql = new ExtractGQL({ inputFilePath: 'nothing' });
+    const queriesDocument = gql`
+      query {
+        author {
+          firstName
+          lastName
+        }
+      }
+      query {
+        person {
+          ...personDetails
+        }
+      }
+      fragment personDetails on Person {
+        firstName
+        lastName
+      }
+    `;
+    const simpleQueryRequest = {
+      id: 1,
+    };
+    const simpleQueryResult: Object = {
+      author: {
+        firstName: 'John',
+        lastName: 'Smith',
+      }
+    };
+    const fragmentQueryRequest = {
+      id: 2,
+    };
+    const fragmentQueryResult: Object = {
+      person: {
+        firstName: 'Jane',
+        lastName: 'Smith',
+      }
+    };
+    const oldFetch = fetch;
+    const queryMap = egql.createMapFromDocument(queriesDocument);
+    const uri = 'http://fake.com/fakegraphql'
+    const pni = new PersistedQueryNetworkInterface({
+      uri,
+      queryMap,
+    });
+
+    before(() => {
+      fetchMock.post(uri, (url: string, opts: Object) => {
+        const receivedObject = JSON.parse((opts as RequestInit).body.toString());
+        if (assert.deepEqual(receivedObject, simpleQueryRequest)) {
+          return simpleQueryResult;
+        } else if (assert.deepEqual(receivedObject, fragmentQueryRequest)) {
+          return fragmentQueryResult;
+        } else {
+          throw new Error('Received unmatched request in mock fetch.');
+        }
+      });
+    });
+
+    after(() => {
+      fetchMock.restore();
+    });
+
+    it('should work for a single, no fragment query', (done) => {
+      pni.query({
+        query: gql`
+        query {
+          author {
+            firstName
+            lastName
+          }
+        }`
+      });
     });
   });
 });
