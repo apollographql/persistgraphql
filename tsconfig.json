@@ -18,6 +18,7 @@
   "files": [
     "typings.d.ts",
     "src/index.ts",
-    "test/tests.ts"
+    "test/tests.ts",
+    "fetch-mock.typings.d.ts"
    ]
 }

@@ -114,7 +114,6 @@ describe('PersistedQueryNetworkInterface', () => {
         lastName: 'Smith',
       }
     };
-    const oldFetch = fetch;
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql'
     const pni = new PersistedQueryNetworkInterface({

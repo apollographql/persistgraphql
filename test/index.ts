@@ -92,12 +92,10 @@ describe('ExtractGQL', () => {
         name
       }`;
       const map = myegql.createMapFromDocument(document);
-      assert.deepEqual(map, {
-        [egql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: document,
-          id: 1,
-        },
-      });
+      const key = egql.getQueryKey(document.definitions[0]);
+      assert.equal(Object.keys(map).length, 1);
+      assert.equal(print(map[key].transformedQuery), print(document));
+      assert.equal(map[key].id, 1);
     });
 
     it('should be able to handle a document with a fragment', () => {
@@ -114,13 +112,10 @@ describe('ExtractGQL', () => {
         }
       `;
       const map = myegql.createMapFromDocument(document);
-
-      assert.deepEqual(map, {
-        [myegql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: document,
-          id: 1,
-        },
-      });
+      const key = myegql.getQueryKey(document.definitions[0]);
+      assert.equal(Object.keys(map).length, 1);
+      assert.equal(print(map[key].transformedQuery), print(document));
+      assert.equal(map[key].id, 1);
     });
 
     it('should be able to handle a document with multiple fragments', () => {
