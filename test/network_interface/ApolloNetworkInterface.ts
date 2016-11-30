@@ -1,6 +1,10 @@
 import * as chai from 'chai';
 const { assert } = chai;
 
+import {
+  GraphQLResult,
+} from 'graphql';
+
 import gql from 'graphql-tag';
 import * as fetchMock from 'fetch-mock';
 const _ = require('lodash');
@@ -92,6 +96,11 @@ describe('PersistedQueryNetworkInterface', () => {
           ...personDetails
         }
       }
+      query {
+        house {
+          address
+        }
+      }
       fragment personDetails on Person {
         firstName
         lastName
@@ -115,6 +124,16 @@ describe('PersistedQueryNetworkInterface', () => {
         lastName: 'Smith',
       }
     };
+    const errorQueryRequest = {
+      id: 3,
+    };
+    const errorQueryData: Object = {
+      house: {
+        address: null,
+      }
+    };
+    const errorQueryError = new Error('Could not compute error.');
+
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql'
     const pni = new PersistedQueryNetworkInterface({
@@ -123,12 +142,14 @@ describe('PersistedQueryNetworkInterface', () => {
     });
 
     before(() => {
-      fetchMock.post(uri, (url: string, opts: Object) => {
+      fetchMock.post(uri, (url: string, opts: Object): GraphQLResult => {
         const receivedObject = JSON.parse((opts as RequestInit).body.toString());
         if (_.isEqual(receivedObject, simpleQueryRequest)) {
           return { data: simpleQueryData };
         } else if (_.isEqual(receivedObject, fragmentQueryRequest)) {
           return { data: fragmentQueryData };
+        } else if (_.isEqual(receivedObject, errorQueryRequest)) {
+          return { data: errorQueryData, errors: [ errorQueryError ] };
         } else {
           throw new Error('Received unmatched request in mock fetch.');
         }
@@ -153,6 +174,42 @@ describe('PersistedQueryNetworkInterface', () => {
         done();
       }).catch((error) => {
         done(error);
+      });
+    });
+
+    it('should work for a query with a fragment', (done) => {
+      pni.query({
+        query: gql`
+          query {
+            person {
+              ...personDetails
+            }
+          }
+
+          fragment personDetails on Person {
+            firstName
+            lastName
+          }
+      `}).then((result) => {
+        assert.deepEqual(result.data, fragmentQueryData);
+        done();
+      });
+    });
+
+    it('should work for a query that returns an error', (done) => {
+      pni.query({
+        query: gql`
+          query {
+            house {
+              address
+            }
+          }
+        `
+      }).then((result) => {
+        assert.deepEqual(result.data, errorQueryData);
+        assert.deepEqual(result.errors.length, 1);
+        assert.deepEqual(result.errors[0], errorQueryError);
+        done();
       });
     });
   });
