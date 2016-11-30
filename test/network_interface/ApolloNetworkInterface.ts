@@ -3,6 +3,7 @@ const { assert } = chai;
 
 import gql from 'graphql-tag';
 import * as fetchMock from 'fetch-mock';
+const _ = require('lodash');
 
 import {
   PersistedQueryNetworkInterface,
@@ -99,7 +100,7 @@ describe('PersistedQueryNetworkInterface', () => {
     const simpleQueryRequest = {
       id: 1,
     };
-    const simpleQueryResult: Object = {
+    const simpleQueryData: Object = {
       author: {
         firstName: 'John',
         lastName: 'Smith',
@@ -108,7 +109,7 @@ describe('PersistedQueryNetworkInterface', () => {
     const fragmentQueryRequest = {
       id: 2,
     };
-    const fragmentQueryResult: Object = {
+    const fragmentQueryData: Object = {
       person: {
         firstName: 'Jane',
         lastName: 'Smith',
@@ -124,10 +125,10 @@ describe('PersistedQueryNetworkInterface', () => {
     before(() => {
       fetchMock.post(uri, (url: string, opts: Object) => {
         const receivedObject = JSON.parse((opts as RequestInit).body.toString());
-        if (assert.deepEqual(receivedObject, simpleQueryRequest)) {
-          return simpleQueryResult;
-        } else if (assert.deepEqual(receivedObject, fragmentQueryRequest)) {
-          return fragmentQueryResult;
+        if (_.isEqual(receivedObject, simpleQueryRequest)) {
+          return { data: simpleQueryData };
+        } else if (_.isEqual(receivedObject, fragmentQueryRequest)) {
+          return { data: fragmentQueryData };
         } else {
           throw new Error('Received unmatched request in mock fetch.');
         }
@@ -147,6 +148,11 @@ describe('PersistedQueryNetworkInterface', () => {
             lastName
           }
         }`
+      }).then((result) => {
+        assert.deepEqual(result.data, simpleQueryData);
+        done();
+      }).catch((error) => {
+        done(error);
       });
     });
   });
