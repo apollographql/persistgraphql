@@ -41,6 +41,7 @@
     "whatwg-fetch": "^2.0.0"
   },
   "devDependencies": {
+    "@types/express": "^4.0.34",
     "apollo-client": "^0.5.6",
     "fetch-mock": "^5.5.0",
     "isomorphic-fetch": "^2.2.1"
