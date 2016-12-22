@@ -7,13 +7,13 @@ import {
 } from '../ExtractGQL';
 
 import {
-  print
+  print,
 } from 'graphql';
 
 import {
   Handler,
   Request,
-  Response
+  Response,
 } from 'express';
 
 // Given a path to the query map returned by ExtractGQL this function returns middleware for Express

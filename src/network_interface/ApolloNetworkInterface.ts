@@ -1,11 +1,4 @@
 import {
-  createNetworkInterface,
-  ObservableQuery,
-  Request,
-} from 'apollo-client';
-
-import {
-  NetworkInterface,
   HTTPFetchNetworkInterface,
   RequestAndOptions,
 } from 'apollo-client/transport/networkInterface';
@@ -40,15 +33,15 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
   // from the query OutputMap.
   public fetchFromRemoteEndpoint({
     request,
-    options
+    options,
   }: RequestAndOptions): Promise<IResponse> {
     const queryDocument = request.query;
-    const queryDefinitions = getQueryDefinitions(queryDocument)
-    if (queryDefinitions.length != 1) {
+    const queryDefinitions = getQueryDefinitions(queryDocument);
+    if (queryDefinitions.length !== 1) {
       throw new Error('Multiple queries in a single document.');
     }
 
-    const mockEGQL = new ExtractGQL({ inputFilePath: "" });
+    const mockEGQL = new ExtractGQL({ inputFilePath: '' });
     const queryKey = mockEGQL.getQueryKey(queryDefinitions[0]);
     if (!this.queryMap[queryKey]) {
       throw new Error('Could not find query inside query map.');

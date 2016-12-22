@@ -113,7 +113,7 @@ describe('PersistedQueryNetworkInterface', () => {
       author: {
         firstName: 'John',
         lastName: 'Smith',
-      }
+      },
     };
     const fragmentQueryRequest = {
       id: 2,
@@ -122,7 +122,7 @@ describe('PersistedQueryNetworkInterface', () => {
       person: {
         firstName: 'Jane',
         lastName: 'Smith',
-      }
+      },
     };
     const errorQueryRequest = {
       id: 3,
@@ -130,12 +130,12 @@ describe('PersistedQueryNetworkInterface', () => {
     const errorQueryData: Object = {
       house: {
         address: null,
-      }
+      },
     };
     const errorQueryError = new Error('Could not compute error.');
 
     const queryMap = egql.createMapFromDocument(queriesDocument);
-    const uri = 'http://fake.com/fakegraphql'
+    const uri = 'http://fake.com/fakegraphql';
     const pni = new PersistedQueryNetworkInterface({
       uri,
       queryMap,
@@ -168,7 +168,7 @@ describe('PersistedQueryNetworkInterface', () => {
             firstName
             lastName
           }
-        }`
+        }`,
       }).then((result) => {
         assert.deepEqual(result.data, simpleQueryData);
         done();
@@ -204,7 +204,7 @@ describe('PersistedQueryNetworkInterface', () => {
               address
             }
           }
-        `
+        `,
       }).then((result) => {
         assert.deepEqual(result.data, errorQueryData);
         assert.deepEqual(result.errors.length, 1);
