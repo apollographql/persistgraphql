@@ -24,18 +24,33 @@ import {
 //
 // The middleware then transforms this JSON object into a standard GraphQL request structure that
 // contains the entire query document for that particular query id, as specified in the query map.
-export function createPersistedQueryMiddleware(queryMapPath: string): Promise<Handler> {
+//
+// Also takes an optional `lookupErrorHandler` that is called with the request, response and next
+// objects in case there is an error in looking up and passing along the associated query, e.g.
+// if a query id arrives that has no associated query.
+export function createPersistedQueryMiddleware(
+  queryMapPath: string,
+  lookupErrorHandler?: Handler,
+): Promise<Handler> {
   return new Promise<Handler>((resolve, reject) => {
     ExtractGQL.readFile(queryMapPath).then((queryMapString) => {
       const queryMap = JSON.parse(queryMapString);
       const middleware: Handler = (req: Request, res: Response, next: any) => {
-        const queryId = req.body.id;
+        const queryId = req.body.id as (number | string);
 
         // TODO this can be made O(1) if we have a reversible structure than a unidirectional
         // hash map.
         const matchedKeys = Object.keys(queryMap).filter((key) => {
-          return (queryMap[key].id === queryId);
+          return (queryId !== undefined && queryMap[key].id.toString() === queryId.toString());
         });
+
+        // If we find no keys with the given id, then we just let the lookupErrorHandler
+        // take care of the situation.
+        if (matchedKeys.length == 0 && lookupErrorHandler) {
+          lookupErrorHandler(req, res, next);
+          return;
+        }
+        
         req.body.query = print(queryMap[matchedKeys[0]].transformedQuery);
         next();
       };
