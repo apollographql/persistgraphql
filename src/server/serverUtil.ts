@@ -44,13 +44,13 @@ export function createPersistedQueryMiddleware(
           return (queryId !== undefined && queryMap[key].id.toString() === queryId.toString());
         });
 
-        // If we find no keys with the given id, then we just let the lookupErrorHandler
+        // If we find no keys with then given id, then we just let the lookupErrorHandler
         // take care of the situation.
-        if (matchedKeys.length == 0 && lookupErrorHandler) {
+        if (matchedKeys.length === 0 && lookupErrorHandler) {
           lookupErrorHandler(req, res, next);
           return;
         }
-        
+
         req.body.query = print(queryMap[matchedKeys[0]].transformedQuery);
         next();
       };

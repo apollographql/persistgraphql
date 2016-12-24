@@ -14,14 +14,11 @@ import {
 
 import {
   Request,
-  Response,
-  NextFunction,
 } from 'express';
 
 describe('serverUtil', () => {
   describe('createPersistedQueryMiddleware', () => {
     const queryMapPath = 'test/fixtures/extracted_queries.json';
-    
     it('it should resolve the returned promise with something', (done) => {
       createPersistedQueryMiddleware('test/fixtures/extracted_queries.json').then((middleware) => {
         assert(middleware);
@@ -65,7 +62,7 @@ describe('serverUtil', () => {
       const next = () => {
         done(new Error('Called next() when it should have just errored and moved on.'));
       };
-      const errorHandler = (req: Request, res: Response, next: NextFunction) => {
+      const errorHandler = () => {
         done();
       };
       createPersistedQueryMiddleware(queryMapPath, errorHandler).then((middleware) => {
@@ -83,7 +80,7 @@ describe('serverUtil', () => {
       const next = () => {
         done(new Error('Called next when it should have errored.'));
       };
-      const errorHandler = (req: Request, res: Response, next: NextFunction) => {
+      const errorHandler = () => {
         done();
       };
       createPersistedQueryMiddleware(queryMapPath, errorHandler).then((middleware) => {
