@@ -128,6 +128,8 @@ export class ExtractGQL {
         const graphQLDocument = parse(fileContents);
 
         resolve(this.createMapFromDocument(graphQLDocument));
+      }).catch((err) => {
+        reject(err);
       });
     });
   }
@@ -158,7 +160,7 @@ export class ExtractGQL {
           // Recurse over the files within this directory.
           fs.readdir(inputPath, (err, items) => {
             if (err) {
-              throw err;
+              reject(err);
             }
             const promises: Promise<OutputMap>[] = items.map((item) => {
               return this.processInputPath(inputPath + '/' + item);
@@ -172,6 +174,10 @@ export class ExtractGQL {
         } else {
           this.processInputFile(inputPath).then((outputMap: OutputMap) => {
             resolve(outputMap);
+          }).catch((err) => {
+            console.log(`Error occurred in processing path ${inputPath}: `);
+            console.log(err.message);
+            reject(err);
           });
         }
       });
@@ -249,6 +255,9 @@ export class ExtractGQL {
     this.processInputPath(this.inputFilePath).then((outputMap: OutputMap) => {
       this.writeOutputMap(outputMap, this.outputFilePath).then(() => {
         console.log(`Wrote output file to ${this.outputFilePath}.`);
+      }).catch((err) => {
+        console.log(`Unable to process path ${this.outputFilePath}. Error message: `);
+        console.log(`${err.message}`);
       });
     });
   }
