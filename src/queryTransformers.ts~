@@ -1,7 +1,0 @@
-import {
-  QueryTransformer,
-} from '../ExtractGQL';
-
-const addTypeNameTransformer: QueryTransformer = (document: OperationDefinition) => {
-
-};
