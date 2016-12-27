@@ -5,3 +5,4 @@ import './index';
 import './extractFromAST';
 import './network_interface/ApolloNetworkInterface';
 import './server/serverUtil';
+import './queryTransformers';
