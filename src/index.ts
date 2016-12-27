@@ -1,7 +1,4 @@
 import { main } from './ExtractGQL';
-import yargs from 'yargs';
+const argv = require('yargs').argv;
 
-console.log(yargs);
-console.log(yargs);
-
-main(yargs);
+main(argv);

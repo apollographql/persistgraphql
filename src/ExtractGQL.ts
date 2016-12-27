@@ -272,6 +272,7 @@ export class ExtractGQL {
 
 // Type for the argument structure provided by the "yargs" library.
 export interface YArgsv {
+  _: string[];
   [ key: string ]: any;
 }
 
@@ -279,7 +280,7 @@ export interface YArgsv {
 export const main = (argv: YArgsv) => {
   // These are the unhypenated arguments that yargs does not process
   // further.
-  const args: string[] = argv['_']
+  const args: string[] = argv._
   let inputFilePath: string;
   let outputFilePath: string;
   const queryTransformers: QueryTransformer[] = [];
@@ -296,6 +297,7 @@ export const main = (argv: YArgsv) => {
   // Check if we are passed "--add_typename", if we are, we have to
   // apply the typename query transformer.
   if (argv['add_typename']) {
+    console.log('Using the add-typename query transformer.');
     queryTransformers.push(addTypenameTransformer);
   }
 
