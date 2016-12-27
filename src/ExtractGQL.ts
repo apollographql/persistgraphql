@@ -15,6 +15,10 @@ import {
   isFragmentDefinition,
 } from './extractFromAST';
 
+import {
+  addTypenameTransformer,
+} from './queryTransformers';
+
 import _ = require('lodash');
 
 // A map from a key (id or a hash) to a GraphQL document.
@@ -79,12 +83,15 @@ export class ExtractGQL {
   constructor({
     inputFilePath,
     outputFilePath = 'extracted_queries.json',
+    queryTransformers = [],
   }: {
     inputFilePath: string,
     outputFilePath?: string,
+    queryTransformers?: QueryTransformer[],
   }) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
+    this.queryTransformers = queryTransformers;
   }
 
   // Apply this.queryTransformers to a query definition.
@@ -263,10 +270,19 @@ export class ExtractGQL {
   }
 }
 
+// Type for the argument structure provided by the "yargs" library.
+export interface YArgsv {
+  [ key: string ]: any;
+}
+
 // Main driving method for the command line tool
-export const main = (args: string[]) => {
+export const main = (argv: YArgsv) => {
+  // These are the unhypenated arguments that yargs does not process
+  // further.
+  const args: string[] = argv['_']
   let inputFilePath: string;
   let outputFilePath: string;
+  const queryTransformers: QueryTransformer[] = [];
 
   if (args.length < 1) {
     console.log('Usage: extractgql input_file [output_file]');
@@ -277,8 +293,15 @@ export const main = (args: string[]) => {
     outputFilePath = args[1];
   }
 
+  // Check if we are passed "--add_typename", if we are, we have to
+  // apply the typename query transformer.
+  if (argv['add_typename']) {
+    queryTransformers.push(addTypenameTransformer);
+  }
+
   new ExtractGQL({
-    inputFilePath: inputFilePath,
-    outputFilePath: outputFilePath,
+    inputFilePath,
+    outputFilePath,
+    queryTransformers,
   }).extract();
 };

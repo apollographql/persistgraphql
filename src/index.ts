@@ -1,3 +1,7 @@
 import { main } from './ExtractGQL';
+import yargs from 'yargs';
 
-main(process.argv.slice(2));
+console.log(yargs);
+console.log(yargs);
+
+main(yargs);
