@@ -13,6 +13,7 @@ import {
   getQueryDefinitions,
   getFragmentNames,
   isFragmentDefinition,
+  isOperationDefinition,
 } from './extractFromAST';
 
 import {
@@ -226,15 +227,30 @@ export class ExtractGQL {
 
   // Returns a key for a query in a document definition. Should include exactly one query and a set
   // of fragments that the query references. Currently just uses GraphQL printing as a serialization
-  // mechanism; may use hashes or ids in the future.
+  // mechanism; may use hashes or ids in the future. Also applies query transformers to the document
+  // before making it a document key.
   public getQueryDocumentKey(document: Document, definition: OperationDefinition): string {
-    return print(this.trimDocumentForQuery(document, definition));
+    const trimmedDocument = this.trimDocumentForQuery(document, definition);
+
+    // Apply query transformers.
+    // TODO May have to change this once query transformers start working on named
+    // fragments.
+    trimmedDocument.definitions = trimmedDocument.definitions.map((definition) => {
+      if (isOperationDefinition(definition)) {
+        return this.applyQueryTransformers(definition);
+      } else {
+        return definition;
+      }
+    });
+
+    return print(trimmedDocument);
   }
 
-  // Returns a key for a query operation definition. Currently just uses GraphQL printing as a serialization
-  // mechanism; may use hashes or ids in the future.
+  // Returns a key for a query operation definition. Currently just uses GraphQL printing as a
+  // serialization mechanism; may use hashes or ids in the future. Also applies the query
+  // transformers to the query definition before returning the key.
   public getQueryKey(definition: OperationDefinition): string {
-    return print(definition);
+    return print(this.applyQueryTransformers(definition));
   }
 
   // Returns unique query ids.

@@ -2,6 +2,7 @@ import {
   Field,
   SelectionSet,
   OperationDefinition,
+  print,
 } from 'graphql';
 
 import {

@@ -4,10 +4,16 @@ const { assert } = chai;
 import {
   createDocumentFromQuery,
 } from '../src/extractFromAST';
+
 import {
   ExtractGQL,
   OutputMap,
 } from '../src/ExtractGQL';
+
+import {
+  addTypenameTransformer,
+} from '../src/queryTransformers';
+
 import { parse, print, OperationDefinition } from 'graphql';
 import gql from 'graphql-tag';
 
@@ -255,7 +261,7 @@ describe('ExtractGQL', () => {
       const map = myegql.createMapFromDocument(originalDocument);
 
       assert.deepEqual(map, {
-        [egql.getQueryKey(originalDocument.definitions[0])]: {
+        [egql.getQueryKey(newDocument.definitions[0])]: {
           id: 1,
           transformedQuery: createDocumentFromQuery(newDocument.definitions[0]),
         },
@@ -336,6 +342,34 @@ describe('ExtractGQL', () => {
       }).catch((err) => {
         done(err);
       });
+    });
+  });
+
+  describe('getQueryKey', () => {
+    it('should apply query transformers before returning the query key', () => {
+      const query = gql`
+        query {
+          author {
+            firstName
+            lastName
+          }
+        }`;
+      const transformedQuery = gql`
+        query {
+          author {
+            firstName
+            lastName
+            __typename
+          }
+        }`;
+      const myegql = new ExtractGQL({
+        inputFilePath: "---",
+        queryTransformers: [ addTypenameTransformer ],
+      });
+      assert.equal(
+        myegql.getQueryKey(query.definitions[0]),
+        print(transformedQuery.definitions[0])
+      );
     });
   });
 
