@@ -106,6 +106,12 @@ describe('PersistedQueryNetworkInterface', () => {
           name
         }
       }
+      query ListOfAuthors {
+        author {
+          firstName
+          lastName
+        }
+      }
       fragment personDetails on Person {
         firstName
         lastName
@@ -151,6 +157,17 @@ describe('PersistedQueryNetworkInterface', () => {
       },
     };
 
+    const operationNameQueryRequest = {
+      operationName: 'ListOfAuthors',
+      id: 5,
+    };
+    const operationNameQueryData: Object = {
+      author: [
+        { name: 'Adam Smith' },
+        { name: 'Thomas Piketty' },
+      ],
+    };
+
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql';
     const pni = new PersistedQueryNetworkInterface({
@@ -169,6 +186,8 @@ describe('PersistedQueryNetworkInterface', () => {
           return { data: errorQueryData, errors: [ errorQueryError ] };
         } else if (_.isEqual(receivedObject, variableQueryRequest)) {
           return { data: variableQueryData };
+        } else if (_.isEqual(receivedObject, operationNameQueryRequest)) {
+          return { data: operationNameQueryData };
         } else {
           throw new Error('Received unmatched request in mock fetch.');
         }
@@ -243,6 +262,22 @@ describe('PersistedQueryNetworkInterface', () => {
         variables: { id: idVariableValue },
       }).then((result) => {
         assert.deepEqual(result.data, variableQueryData);
+        done();
+      });
+    });
+
+    it('should pass along the operation name to the server', (done) => {
+      pni.query({
+        query: gql`
+          query ListOfAuthors {
+            author {
+              firstName
+              lastName
+            }
+          }`,
+        operationName: 'ListOfAuthors',
+      }).then((result) => {
+        assert.deepEqual(result.data, operationNameQueryData);
         done();
       });
     });
