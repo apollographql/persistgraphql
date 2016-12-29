@@ -101,6 +101,11 @@ describe('PersistedQueryNetworkInterface', () => {
           address
         }
       }
+      query {
+        person(id: $id) {
+          name
+        }
+      }
       fragment personDetails on Person {
         firstName
         lastName
@@ -124,6 +129,7 @@ describe('PersistedQueryNetworkInterface', () => {
         lastName: 'Smith',
       },
     };
+
     const errorQueryRequest = {
       id: 3,
     };
@@ -133,6 +139,17 @@ describe('PersistedQueryNetworkInterface', () => {
       },
     };
     const errorQueryError = new Error('Could not compute error.');
+
+    const idVariableValue = '1';
+    const variableQueryRequest = {
+      id: 4,
+      variables: { id: idVariableValue },
+    };
+    const variableQueryData: Object = {
+      person: {
+        name: 'Dhaivat Pandya',
+      },
+    };
 
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql';
@@ -150,6 +167,8 @@ describe('PersistedQueryNetworkInterface', () => {
           return { data: fragmentQueryData };
         } else if (_.isEqual(receivedObject, errorQueryRequest)) {
           return { data: errorQueryData, errors: [ errorQueryError ] };
+        } else if (_.isEqual(receivedObject, variableQueryRequest)) {
+          return { data: variableQueryData };
         } else {
           throw new Error('Received unmatched request in mock fetch.');
         }
@@ -209,6 +228,21 @@ describe('PersistedQueryNetworkInterface', () => {
         assert.deepEqual(result.data, errorQueryData);
         assert.deepEqual(result.errors.length, 1);
         assert.deepEqual(result.errors[0], errorQueryError);
+        done();
+      });
+    });
+
+    it('should pass along variables to the server', (done) => {
+      pni.query({
+        query: gql`
+          query {
+            person(id: $id) {
+              name
+            }
+          }`,
+        variables: { id: idVariableValue },
+      }).then((result) => {
+        assert.deepEqual(result.data, variableQueryData);
         done();
       });
     });

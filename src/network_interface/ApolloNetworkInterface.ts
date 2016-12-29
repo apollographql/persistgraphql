@@ -48,6 +48,8 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     }
     const serverRequest = {
       id: this.queryMap[queryKey].id,
+      variables: request.variables,
+      operationName: request.operationName,
     };
     return fetch(this._uri, _.assign({}, this._opts, {
       body: JSON.stringify(serverRequest),
