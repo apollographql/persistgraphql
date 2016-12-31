@@ -32,7 +32,7 @@ export interface TransformedQueryWithId {
   id: number | string;
 }
 
-export type QueryTransformer = (doc: OperationDefinition) => OperationDefinition;
+export type QueryTransformer = (doc: Document) => Document;
 
 export class ExtractGQL {
   public inputFilePath: string;
@@ -96,12 +96,12 @@ export class ExtractGQL {
   }
 
   // Apply this.queryTransformers to a query definition.
-  public applyQueryTransformers(queryDefinition: OperationDefinition): OperationDefinition {
-    let currentDefinition = queryDefinition;
+  public applyQueryTransformers(document: Document): Document {
+    let currentDocument = document;
     this.queryTransformers.forEach((transformer) => {
-      currentDefinition = transformer(currentDefinition);
+      currentDocument = transformer(currentDocument);
     });
-    return currentDefinition;
+    return currentDocument;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -112,13 +112,13 @@ export class ExtractGQL {
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
-    const queryDefinitions = getQueryDefinitions(document);
+    const transformedDocument = this.applyQueryTransformers(document);
+    const queryDefinitions = getQueryDefinitions(transformedDocument);
     const result: OutputMap = {};
-    queryDefinitions.forEach((definition) => {
-      const queryKey = this.getQueryKey(definition);
-      const transformedQuery = this.applyQueryTransformers(definition);
-      const transformedQueryWithFragments = this.getQueryFragments(document, transformedQuery);
-      transformedQueryWithFragments.definitions.unshift(transformedQuery);
+    queryDefinitions.forEach((transformedDefinition) => {
+      const queryKey = this.getQueryKey(transformedDefinition);
+      const transformedQueryWithFragments = this.getQueryFragments(document, transformedDefinition);
+      transformedQueryWithFragments.definitions.unshift(transformedDefinition);
 
       result[queryKey] = {
         transformedQuery: transformedQueryWithFragments,
@@ -230,27 +230,18 @@ export class ExtractGQL {
   // mechanism; may use hashes or ids in the future. Also applies query transformers to the document
   // before making it a document key.
   public getQueryDocumentKey(document: Document, definition: OperationDefinition): string {
-    const trimmedDocument = this.trimDocumentForQuery(document, definition);
-
-    // Apply query transformers.
-    // TODO May have to change this once query transformers start working on named
-    // fragments.
-    trimmedDocument.definitions = trimmedDocument.definitions.map((definition) => {
-      if (isOperationDefinition(definition)) {
-        return this.applyQueryTransformers(definition);
-      } else {
-        return definition;
-      }
-    });
-
-    return print(trimmedDocument);
+    return print(this.applyQueryTransformers(this.trimDocumentForQuery(document, definition)));
   }
 
   // Returns a key for a query operation definition. Currently just uses GraphQL printing as a
   // serialization mechanism; may use hashes or ids in the future. Also applies the query
   // transformers to the query definition before returning the key.
   public getQueryKey(definition: OperationDefinition): string {
-    return print(this.applyQueryTransformers(definition));
+    const wrappingDocument: Document = {
+      kind: 'Document',
+      definitions: [ definition ],
+    };
+    return print(this.applyQueryTransformers(wrappingDocument).definitions[0]);
   }
 
   // Returns unique query ids.

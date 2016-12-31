@@ -19,16 +19,10 @@ import {
 describe('query transformers', () => {
   describe('typename query transformer', () => {
     const assertTransform = (inputQuery: Document, expected: Document) => {
-      const inputDefinition = inputQuery.definitions[0];
-      const expectedDefinition = expected.definitions[0];
-      if (isOperationDefinition(inputDefinition)) {
-        assert.equal(
-          print(addTypenameTransformer(inputDefinition)),
-          print(expectedDefinition)
-        );
-      } else {
-        throw new Error('The first definition in the query was not an OperationDefinition.');
-      }
+      assert.equal(
+        print(addTypenameTransformer(inputQuery)),
+        print(expected)
+      );
     };
 
     it('should add __typename to all the levels of a simple query', () => {
@@ -89,6 +83,79 @@ describe('query transformers', () => {
          }
        }`);
 
+    });
+
+    it('should not add __typename to top-level fragments', () => {
+      assertTransform(gql`
+        query {
+          author {
+            ...details
+          }
+        }
+        fragment details on Author {
+          firstName
+          lastName
+        }`,
+        gql`
+        query {
+          author {
+            ...details
+            __typename
+          }
+        }
+        fragment details on Author {
+          firstName
+          lastName
+        }`);
+    });
+
+    it('should add __typename to inner fragment fields', () => {
+      assertTransform(gql`
+       query {
+         author {
+           ...details
+         }
+
+         books {
+           ...bookDetails
+         }
+       }
+       fragment details on Author {
+         name {
+           firstName
+           lastName
+         }
+       }
+       fragment bookDetails on Book {
+         publisher {
+           name
+         }
+       }`,
+       gql`
+       query {
+         author {
+           ...details
+           __typename
+         }
+
+         books {
+           ...bookDetails
+           __typename
+         }
+       }
+       fragment details on Author {
+         name {
+           firstName
+           lastName
+           __typename
+         }
+       }
+       fragment bookDetails on Book {
+         publisher {
+           name
+           __typename
+         }
+      }`);
     });
   });
 });

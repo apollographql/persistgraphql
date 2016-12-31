@@ -1,7 +1,7 @@
 import {
   Field,
   SelectionSet,
-  OperationDefinition,
+  Document,
   print,
 } from 'graphql';
 
@@ -12,6 +12,8 @@ import {
 import {
   isField,
   isInlineFragment,
+  isOperationDefinition,
+  isFragmentDefinition,
 } from './extractFromAST';
 
 const _ = require('lodash');
@@ -33,10 +35,14 @@ const TYPENAME_FIELD: Field = {
 };
 
 // Query transformer that adds a `__typename` field to every level of the document.
-export const addTypenameTransformer: QueryTransformer = (definition: OperationDefinition) => {
-  const defClone: OperationDefinition = _.cloneDeep(definition);
-  addTypenameToSelectionSet(defClone.selectionSet, true);
-  return defClone;
+export const addTypenameTransformer: QueryTransformer = (document: Document) => {
+  const docClone: Document = _.cloneDeep(document);
+  docClone.definitions.forEach((definition) => {
+    if (isOperationDefinition(definition) || isFragmentDefinition(definition)) {
+      addTypenameToSelectionSet(definition.selectionSet, true);
+    }
+  });
+  return docClone;
 };
 
 // Internal function that adds a `__typename` field to every level of a given selection set.

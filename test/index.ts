@@ -14,7 +14,13 @@ import {
   addTypenameTransformer,
 } from '../src/queryTransformers';
 
-import { parse, print, OperationDefinition } from 'graphql';
+import {
+  parse,
+  print,
+  OperationDefinition,
+  Document,
+} from 'graphql';
+
 import gql from 'graphql-tag';
 
 describe('ExtractGQL', () => {
@@ -246,24 +252,25 @@ describe('ExtractGQL', () => {
           }
         }
       `;
-      const newDocument = gql`
+      const newDocument: Document = gql`
         query {
           person {
             name
           }
         }
       `;
-      const queryTransformer = (queryDef: OperationDefinition) => {
-        return newDocument.definitions[0];
+      const newQueryDef = newDocument.definitions[0] as OperationDefinition;
+      const queryTransformer = (queryDoc: Document) => {
+        return newDocument;
       };
       const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       myegql.addQueryTransformer(queryTransformer);
       const map = myegql.createMapFromDocument(originalDocument);
 
       assert.deepEqual(map, {
-        [egql.getQueryKey(newDocument.definitions[0])]: {
+        [egql.getQueryKey(newQueryDef)]: {
           id: 1,
-          transformedQuery: createDocumentFromQuery(newDocument.definitions[0]),
+          transformedQuery: createDocumentFromQuery(newQueryDef),
         },
       });
     });
