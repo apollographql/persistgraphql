@@ -23,8 +23,6 @@ const _ = require('lodash');
 //
 // This probably means that this implementation should be exported as some kind of library,
 // along with some of the other AST-related stuff implemented for apollo-client.
-
-
 const TYPENAME_FIELD: Field = {
   kind: 'Field',
   alias: null,

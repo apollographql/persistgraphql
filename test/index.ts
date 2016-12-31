@@ -240,6 +240,47 @@ describe('ExtractGQL', () => {
         },
       });
     });
+
+    it('should be able to apply query transforms to a document with fragments', () => {
+      const myegql = new ExtractGQL({
+        inputFilePath: 'empty',
+        queryTransformers: [ addTypenameTransformer ],
+      });
+      const document = gql`
+      query {
+        author {
+          ...details
+        }
+      }
+      fragment details on Author {
+        name {
+          firstName
+          lastName
+        }
+      }`;
+      const transformedDocument = gql`
+      query {
+        author {
+          ...details
+          __typename
+        }
+      }
+      fragment details on Author {
+        name {
+          firstName
+          lastName
+          __typename
+        }
+      }`;
+      const map = myegql.createMapFromDocument(document);
+      assert.equal(Object.keys(map).length, 1);
+      const mapValue = map[myegql.getQueryKey(document.definitions[0])]
+      assert.equal(
+        print(mapValue.transformedQuery),
+        print(transformedDocument)
+      );
+      assert.equal(mapValue.id, 1);
+    });
   });
 
   describe('queryTransformers', () => {

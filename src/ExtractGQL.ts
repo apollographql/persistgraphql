@@ -117,7 +117,7 @@ export class ExtractGQL {
     const result: OutputMap = {};
     queryDefinitions.forEach((transformedDefinition) => {
       const queryKey = this.getQueryKey(transformedDefinition);
-      const transformedQueryWithFragments = this.getQueryFragments(document, transformedDefinition);
+      const transformedQueryWithFragments = this.getQueryFragments(transformedDocument, transformedDefinition);
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
 
       result[queryKey] = {
