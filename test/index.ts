@@ -7,8 +7,11 @@ import {
 
 import {
   ExtractGQL,
-  OutputMap,
 } from '../src/ExtractGQL';
+
+import {
+  OutputMap,
+} from '../src/common';
 
 import {
   addTypenameTransformer,

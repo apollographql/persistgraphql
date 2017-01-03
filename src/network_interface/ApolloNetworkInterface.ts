@@ -3,9 +3,12 @@ import {
   RequestAndOptions,
 } from 'apollo-client/transport/networkInterface';
 
-import { OutputMap } from '../ExtractGQL';
+import {
+  getQueryKey,
+  OutputMap,
+} from '../common';
+
 import { getQueryDefinitions } from '../extractFromAST';
-import { ExtractGQL } from '../ExtractGQL';
 const _ = require('lodash');
 
 export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
@@ -40,9 +43,8 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     if (queryDefinitions.length !== 1) {
       throw new Error('Multiple queries in a single document.');
     }
-
-    const mockEGQL = new ExtractGQL({ inputFilePath: '' });
-    const queryKey = mockEGQL.getQueryKey(queryDefinitions[0]);
+    
+    const queryKey = getQueryKey(queryDefinitions[0]);
     if (!this.queryMap[queryKey]) {
       throw new Error('Could not find query inside query map.');
     }

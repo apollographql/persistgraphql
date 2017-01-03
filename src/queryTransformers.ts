@@ -7,7 +7,7 @@ import {
 
 import {
   QueryTransformer,
-} from './ExtractGQL';
+} from './common';
 
 import {
   isField,

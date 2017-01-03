@@ -1,3 +1,5 @@
+// This file implements the extractgql CLI tool.
+
 import fs = require('fs');
 import path = require('path');
 
@@ -17,22 +19,18 @@ import {
 } from './extractFromAST';
 
 import {
+  getQueryKey,
+  applyQueryTransformers,
+  TransformedQueryWithId,
+  OutputMap,
+  QueryTransformer,
+} from './common';
+
+import {
   addTypenameTransformer,
 } from './queryTransformers';
 
 import _ = require('lodash');
-
-// A map from a key (id or a hash) to a GraphQL document.
-export interface OutputMap {
-  [key: string]: TransformedQueryWithId;
-}
-
-export interface TransformedQueryWithId {
-  transformedQuery: Document;
-  id: number | string;
-}
-
-export type QueryTransformer = (doc: Document) => Document;
 
 export class ExtractGQL {
   public inputFilePath: string;
@@ -95,20 +93,22 @@ export class ExtractGQL {
     this.queryTransformers = queryTransformers;
   }
 
-  // Apply this.queryTransformers to a query definition.
-  public applyQueryTransformers(document: Document): Document {
-    let currentDocument = document;
-    this.queryTransformers.forEach((transformer) => {
-      currentDocument = transformer(currentDocument);
-    });
-    return currentDocument;
-  }
-
   // Add a query transformer to the end of the list of query transformers.
   public addQueryTransformer(queryTransformer: QueryTransformer) {
     this.queryTransformers.push(queryTransformer);
   }
 
+  // Applies this.queryTransformers to a query document.
+  public applyQueryTransformers(document: Document) {
+    return applyQueryTransformers(document, this.queryTransformers);
+  }
+
+  // Just calls getQueryKey with this.queryTransformers as its set of
+  // query transformers and returns a serialization of the query.
+  public getQueryKey(definition: OperationDefinition): string {
+    return getQueryKey(definition, this.queryTransformers);
+  }
+  
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
@@ -223,25 +223,6 @@ export class ExtractGQL {
               || definition === queryDefinition);
     });
     return retDocument;
-  }
-
-  // Returns a key for a query in a document definition. Should include exactly one query and a set
-  // of fragments that the query references. Currently just uses GraphQL printing as a serialization
-  // mechanism; may use hashes or ids in the future. Also applies query transformers to the document
-  // before making it a document key.
-  public getQueryDocumentKey(document: Document, definition: OperationDefinition): string {
-    return print(this.applyQueryTransformers(this.trimDocumentForQuery(document, definition)));
-  }
-
-  // Returns a key for a query operation definition. Currently just uses GraphQL printing as a
-  // serialization mechanism; may use hashes or ids in the future. Also applies the query
-  // transformers to the query definition before returning the key.
-  public getQueryKey(definition: OperationDefinition): string {
-    const wrappingDocument: Document = {
-      kind: 'Document',
-      definitions: [ definition ],
-    };
-    return print(this.applyQueryTransformers(wrappingDocument).definitions[0]);
   }
 
   // Returns unique query ids.
