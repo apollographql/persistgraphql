@@ -19,10 +19,18 @@ import {
 describe('serverUtil', () => {
   describe('createPersistedQueryMiddleware', () => {
     const queryMapPath = 'test/fixtures/extracted_queries.json';
-    it('it should resolve the returned promise with something', (done) => {
+    it('should resolve the returned promise with something', (done) => {
       createPersistedQueryMiddleware('test/fixtures/extracted_queries.json').then((middleware) => {
-        console.log('Something happened at the very least.');
         assert(middleware);
+        done();
+      });
+    });
+
+    it('should reject the promise in the event that the file cannot be found', (done) => {
+      createPersistedQueryMiddleware('made-up-file-path.json').then((middleware) => {
+        done(new Error('Returned a middleware instance when it should not have.'));
+      }).catch((error) => {
+        assert.include(error.message, 'ENOENT');
         done();
       });
     });
