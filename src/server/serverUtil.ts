@@ -57,6 +57,8 @@ export function createPersistedQueryMiddleware(
         next();
       };
       resolve(middleware);
+    }).catch((err: Error) => {
+      reject(err);
     });
   });
 }

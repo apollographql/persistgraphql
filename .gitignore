@@ -38,5 +38,5 @@ npm
 # alm editor
 .alm
 
-# output from the build tools
-extracted_queries.json
+# output from the build tools in the root
+./extracted_queries.json

@@ -21,6 +21,7 @@ describe('serverUtil', () => {
     const queryMapPath = 'test/fixtures/extracted_queries.json';
     it('it should resolve the returned promise with something', (done) => {
       createPersistedQueryMiddleware('test/fixtures/extracted_queries.json').then((middleware) => {
+        console.log('Something happened at the very least.');
         assert(middleware);
         done();
       });
