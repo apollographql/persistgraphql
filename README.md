@@ -49,3 +49,4 @@ write an output JSON file from serialized query -> query
 - Got extractgql working on `.graphql` files with some degree of named fragment support and support for query transformers.
 - Implemented middleware for Express and a persisted query network interface for Apollo Client, which will soon be integrated into a version of GitHunt that will be able to use persisted queries.
 - Added command line opt parsing to handle "--add-typename" which allows the user to select the query transformer that adds the typename to each level of the query. It seems unlikely that there'll be tons of query transformers straight off the bat so this seems like a reasonable approach for the timebeing.
+- Added handling of the README
