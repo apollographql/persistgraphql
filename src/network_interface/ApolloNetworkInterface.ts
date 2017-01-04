@@ -8,7 +8,7 @@ import {
   OutputMap,
 } from '../common';
 
-import { getQueryDefinitions } from '../extractFromAST';
+import { getOperationDefinitions } from '../extractFromAST';
 const _ = require('lodash');
 
 export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
@@ -39,12 +39,12 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     options,
   }: RequestAndOptions): Promise<IResponse> {
     const queryDocument = request.query;
-    const queryDefinitions = getQueryDefinitions(queryDocument);
-    if (queryDefinitions.length !== 1) {
+    const operationDefinitions = getOperationDefinitions(queryDocument);
+    if (operationDefinitions.length !== 1) {
       throw new Error('Multiple queries in a single document.');
     }
     
-    const queryKey = getQueryKey(queryDefinitions[0]);
+    const queryKey = getQueryKey(operationDefinitions[0]);
     if (!this.queryMap[queryKey]) {
       throw new Error('Could not find query inside query map.');
     }

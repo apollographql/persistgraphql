@@ -60,6 +60,10 @@ export function getQueryDefinitions(doc: Document): OperationDefinition[] {
   return queryDefinitions;
 }
 
+export function getOperationDefinitions(doc: Document): OperationDefinition[] {
+  return doc.definitions.filter(isOperationDefinition) as OperationDefinition[];
+}
+
 // Extracts the names of fragments from a SelectionSet recursively, given a document in which
 // each of the fragments defined are given. Returns a map going from
 // the name of fragment to the integer "1" to support O(1) lookups.

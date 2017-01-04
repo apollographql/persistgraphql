@@ -112,6 +112,10 @@ describe('PersistedQueryNetworkInterface', () => {
           lastName
         }
       }
+      mutation changeAuthorStuff {
+        firstName
+        lastName
+      }
       fragment personDetails on Person {
         firstName
         lastName
@@ -156,7 +160,6 @@ describe('PersistedQueryNetworkInterface', () => {
         name: 'Dhaivat Pandya',
       },
     };
-
     const operationNameQueryRequest = {
       operationName: 'ListOfAuthors',
       id: 5,
@@ -168,6 +171,14 @@ describe('PersistedQueryNetworkInterface', () => {
       ],
     };
 
+    const mutationRequest = {
+      id: 6,
+    };
+    const mutationData = {
+      firstName: 'John',
+      lastName: 'Smith',
+    };
+    
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql';
     const pni = new PersistedQueryNetworkInterface({
@@ -188,6 +199,8 @@ describe('PersistedQueryNetworkInterface', () => {
           return { data: variableQueryData };
         } else if (_.isEqual(receivedObject, operationNameQueryRequest)) {
           return { data: operationNameQueryData };
+        } else if (_.isEqual(receivedObject, mutationRequest)) {
+          return { data: mutationData };
         } else {
           throw new Error('Received unmatched request in mock fetch.');
         }
@@ -278,6 +291,19 @@ describe('PersistedQueryNetworkInterface', () => {
         operationName: 'ListOfAuthors',
       }).then((result) => {
         assert.deepEqual(result.data, operationNameQueryData);
+        done();
+      });
+    });
+
+    it('should also work with mutations', (done) => {
+      pni.query({
+        query: gql`
+          mutation changeAuthorStuff {
+            firstName
+            lastName
+          }`,
+      }).then((result) => {
+        assert.deepEqual(result.data, mutationData);
         done();
       });
     });

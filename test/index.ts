@@ -96,7 +96,7 @@ describe('ExtractGQL', () => {
 
   describe('createMapFromDocument', () => {
     it('should be able to handle a document with no queries', () => {
-      const document = gql`mutation something { otherThing }`;
+      const document = gql`fragment something on Type { otherThing }`;
       const map = egql.createMapFromDocument(document);
       assert.deepEqual(map, {});
     });
@@ -283,6 +283,22 @@ describe('ExtractGQL', () => {
         print(transformedDocument)
       );
       assert.equal(mapValue.id, 1);
+    });
+
+    it('should be able to handle a document with a mutation', () => {
+      const myegql = new ExtractGQL({ inputFilePath: 'empty' });
+      const document = gql`
+        mutation changeAuthorStuff {
+          firstName
+          lastName
+        }`;
+      const map = myegql.createMapFromDocument(document);
+      assert.deepEqual(map, {
+        [egql.getQueryKey(document.definitions[0])]: {
+          transformedQuery: createDocumentFromQuery(document.definitions[0]),
+          id: 1,
+        },
+      });
     });
   });
 

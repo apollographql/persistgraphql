@@ -12,7 +12,7 @@ import {
 } from 'graphql';
 
 import {
-  getQueryDefinitions,
+  getOperationDefinitions,
   getFragmentNames,
   isFragmentDefinition,
   isOperationDefinition,
@@ -113,7 +113,7 @@ export class ExtractGQL {
   // queries, mutations and fragments.
   public createMapFromDocument(document: Document): OutputMap {
     const transformedDocument = this.applyQueryTransformers(document);
-    const queryDefinitions = getQueryDefinitions(transformedDocument);
+    const queryDefinitions = getOperationDefinitions(transformedDocument);
     const result: OutputMap = {};
     queryDefinitions.forEach((transformedDefinition) => {
       const queryKey = this.getQueryKey(transformedDefinition);
