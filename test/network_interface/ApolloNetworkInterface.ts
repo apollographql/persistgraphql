@@ -2,7 +2,7 @@ import * as chai from 'chai';
 const { assert } = chai;
 
 import {
-  GraphQLResult,
+  ExecutionResult,
 } from 'graphql';
 
 import gql from 'graphql-tag';
@@ -187,7 +187,7 @@ describe('PersistedQueryNetworkInterface', () => {
     });
 
     before(() => {
-      fetchMock.post(uri, (url: string, opts: Object): GraphQLResult => {
+      fetchMock.post(uri, (url: string, opts: Object): ExecutionResult => {
         const receivedObject = JSON.parse((opts as RequestInit).body.toString());
         if (_.isEqual(receivedObject, simpleQueryRequest)) {
           return { data: simpleQueryData };

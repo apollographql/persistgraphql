@@ -4,8 +4,8 @@
 // This file should not import any Node/server-specific modules.
 
 import {
-  OperationDefinition,
-  Document,
+  OperationDefinitionNode,
+  DocumentNode,
   print,
 } from 'graphql';
   
@@ -15,17 +15,17 @@ export interface OutputMap {
 }
 
 export interface TransformedQueryWithId {
-  transformedQuery: Document;
+  transformedQuery: DocumentNode;
   id: number | string;
 }
 
-export type QueryTransformer = (doc: Document) => Document;
+export type QueryTransformer = (doc: DocumentNode) => DocumentNode;
 
 // Apply queryTransformers to a query document.
 export function applyQueryTransformers(
-  document: Document,
+  document: DocumentNode,
   queryTransformers: QueryTransformer[] = []
-): Document {
+): DocumentNode {
   let currentDocument = document;
   queryTransformers.forEach((transformer) => {
     currentDocument = transformer(currentDocument);
@@ -37,10 +37,10 @@ export function applyQueryTransformers(
 // serialization mechanism; may use hashes or ids in the future. Also applies the query
 // transformers to the query definition before returning the key.
 export function getQueryKey(
-  definition: OperationDefinition,
+  definition: OperationDefinitionNode,
   queryTransformers: QueryTransformer[] = [],
 ): string {
-  const wrappingDocument: Document = {
+  const wrappingDocument: DocumentNode = {
     kind: 'Document',
     definitions: [ definition ],
   };
@@ -54,6 +54,9 @@ export function getQueryKey(
 // of fragments that the query references. Currently just uses GraphQL printing as a serialization
 // mechanism; may use hashes or ids in the future. Also applies query transformers to the document
 // before making it a document key.
-export function getQueryDocumentKey(document: Document, definition: OperationDefinition): string {
+export function getQueryDocumentKey(
+  document: DocumentNode,
+  definition: OperationDefinitionNode
+): string {
   return print(this.applyQueryTransformers(this.trimDocumentForQuery(document, definition)));
 }

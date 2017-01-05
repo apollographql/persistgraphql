@@ -4,7 +4,7 @@ const { assert } = chai;
 import gql from 'graphql-tag';
 
 import {
-  Document,
+  DocumentNode,
   print,
 } from 'graphql';
 
@@ -38,7 +38,7 @@ describe('serverUtil', () => {
     it('returned middleware should be able to pass along query id', (done) => {
       const req = {
         id: '1',
-        query: undefined as Document,
+        query: undefined as DocumentNode,
       };
       const expectedQuery = gql`
         query {

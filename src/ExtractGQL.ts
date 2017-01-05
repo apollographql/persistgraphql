@@ -5,10 +5,11 @@ import path = require('path');
 
 import {
   parse,
-  Document,
-  OperationDefinition,
+  DocumentNode,
+  OperationDefinitionNode,
+  FragmentDefinitionNode,
   print,
-  Definition,
+  DefinitionNode,
 } from 'graphql';
 
 import {
@@ -99,19 +100,19 @@ export class ExtractGQL {
   }
 
   // Applies this.queryTransformers to a query document.
-  public applyQueryTransformers(document: Document) {
+  public applyQueryTransformers(document: DocumentNode) {
     return applyQueryTransformers(document, this.queryTransformers);
   }
 
   // Just calls getQueryKey with this.queryTransformers as its set of
   // query transformers and returns a serialization of the query.
-  public getQueryKey(definition: OperationDefinition): string {
+  public getQueryKey(definition: OperationDefinitionNode): string {
     return getQueryKey(definition, this.queryTransformers);
   }
   
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
-  public createMapFromDocument(document: Document): OutputMap {
+  public createMapFromDocument(document: DocumentNode): OutputMap {
     const transformedDocument = this.applyQueryTransformers(document);
     const queryDefinitions = getOperationDefinitions(transformedDocument);
     const result: OutputMap = {};
@@ -195,14 +196,15 @@ export class ExtractGQL {
   // Takes a document and a query definition contained within that document. Then, extracts
   // the fragments that the query depends on from the document and returns a document containing
   // only those fragments.
-  public getQueryFragments(document: Document, queryDefinition: OperationDefinition): Document {
+  public getQueryFragments(document: DocumentNode, queryDefinition: OperationDefinitionNode): DocumentNode {
     const queryFragmentNames = getFragmentNames(queryDefinition.selectionSet, document);
-    const retDocument: Document = {
+    const retDocument: DocumentNode = {
       kind: 'Document',
       definitions: [],
     };
-    retDocument.definitions = document.definitions.filter((definition: Definition) => {
-      return (isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] === 1);
+    retDocument.definitions = document.definitions.filter((definition: DefinitionNode) => {
+      const definitionName = (definition as (FragmentDefinitionNode | OperationDefinitionNode)).name;
+      return (isFragmentDefinition(definition) && queryFragmentNames[definitionName.value] === 1);
     });
     return retDocument;
   }
@@ -212,14 +214,15 @@ export class ExtractGQL {
   // fragments and the specified query definition (note that the query definition must be the
   // reference to the query definition contained with the document structure). Input document
   // may be mutated.
-  public trimDocumentForQuery(document: Document, queryDefinition: OperationDefinition): Document {
+  public trimDocumentForQuery(document: DocumentNode, queryDefinition: OperationDefinitionNode): DocumentNode {
     const queryFragmentNames = getFragmentNames(queryDefinition.selectionSet, document);
-    const retDocument: Document = {
+    const retDocument: DocumentNode = {
       kind: 'Document',
       definitions: [],
     };
-    retDocument.definitions = document.definitions.filter((definition: Definition) => {
-      return ((isFragmentDefinition(definition) && queryFragmentNames[definition.name.value] === 1)
+    retDocument.definitions = document.definitions.filter((definition: DefinitionNode) => {
+      const name = (definition as (OperationDefinitionNode | FragmentDefinitionNode)).name;
+      return ((isFragmentDefinition(definition) && queryFragmentNames[name.value] === 1)
               || definition === queryDefinition);
     });
     return retDocument;

@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 
 import {
   print,
-  Document,
+  DocumentNode,
 } from 'graphql';
 
 import {
@@ -18,7 +18,7 @@ import {
 
 describe('query transformers', () => {
   describe('typename query transformer', () => {
-    const assertTransform = (inputQuery: Document, expected: Document) => {
+    const assertTransform = (inputQuery: DocumentNode, expected: DocumentNode) => {
       assert.equal(
         print(addTypenameTransformer(inputQuery)),
         print(expected)

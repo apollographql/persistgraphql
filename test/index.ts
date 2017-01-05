@@ -20,8 +20,8 @@ import {
 import {
   parse,
   print,
-  OperationDefinition,
-  Document,
+  OperationDefinitionNode,
+  DocumentNode,
 } from 'graphql';
 
 import gql from 'graphql-tag';
@@ -312,15 +312,15 @@ describe('ExtractGQL', () => {
           }
         }
       `;
-      const newDocument: Document = gql`
+      const newDocument: DocumentNode = gql`
         query {
           person {
             name
           }
         }
       `;
-      const newQueryDef = newDocument.definitions[0] as OperationDefinition;
-      const queryTransformer = (queryDoc: Document) => {
+      const newQueryDef = newDocument.definitions[0] as OperationDefinitionNode;
+      const queryTransformer = (queryDoc: DocumentNode) => {
         return newDocument;
       };
       const myegql = new ExtractGQL({ inputFilePath: 'empty' });
