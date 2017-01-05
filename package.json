@@ -1,6 +1,6 @@
 {
   "name": "extractgql",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A build tool for GraphQL projects.",
   "main": "lib/src/index.js",
   "scripts": {
