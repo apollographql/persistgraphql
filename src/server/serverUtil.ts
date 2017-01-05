@@ -7,6 +7,10 @@ import {
 } from '../ExtractGQL';
 
 import {
+  OutputMap,
+} from '../common';
+
+import {
   print,
 } from 'graphql';
 
@@ -36,29 +40,37 @@ export function createPersistedQueryMiddleware(
   return new Promise<Handler>((resolve, reject) => {
     ExtractGQL.readFile(queryMapPath).then((queryMapString) => {
       const queryMap = JSON.parse(queryMapString);
-      const middleware: Handler = (req: Request, res: Response, next: any) => {
-        const queryId = req.body.id as (number | string);
-
-        // TODO this can be made O(1) if we have a reversible structure than a unidirectional
-        // hash map.
-        const matchedKeys = Object.keys(queryMap).filter((key) => {
-          return (queryId !== undefined &&
-                  queryMap[key].id.toString() === queryId.toString());
-        });
-
-        // If we find no keys with then given id, then we just let the lookupErrorHandler
-        // take care of the situation.
-        if (matchedKeys.length === 0 && lookupErrorHandler) {
-          lookupErrorHandler(req, res, next);
-          return;
-        }
-
-        req.body.query = print(queryMap[matchedKeys[0]].transformedQuery);
-        next();
-      };
-      resolve(middleware);
+      resolve(getMiddlewareForQueryMap(queryMap, lookupErrorHandler));
     }).catch((err: Error) => {
       reject(err);
     });
+  });
+}
+
+// The same thing as `createPersistedQueryMiddleware` but takes the queryMap rather than
+// a path to the query map.
+export function getMiddlewareForQueryMap(
+  queryMap: OutputMap,
+  lookupErrorHandler?: Handler,
+): Handler {
+  return ((req: Request, res: Response, next: any) => {
+    const queryId = req.body.id as (number | string);
+
+    // TODO this can be made O(1) if we have a reversible structure than a unidirectional
+    // hash map.
+    const matchedKeys = Object.keys(queryMap).filter((key) => {
+      return (queryId !== undefined &&
+              queryMap[key].id.toString() === queryId.toString());
+    });
+
+    // If we find no keys with then given id, then we just let the lookupErrorHandler
+    // take care of the situation.
+    if (matchedKeys.length === 0 && lookupErrorHandler) {
+      lookupErrorHandler(req, res, next);
+      return;
+    }
+
+    req.body.query = print(queryMap[matchedKeys[0]].transformedQuery);
+    next();
   });
 }

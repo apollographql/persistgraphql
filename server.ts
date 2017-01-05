@@ -3,9 +3,11 @@
 
 import {
   createPersistedQueryMiddleware,
+  getMiddlewareForQueryMap,
 } from './src/server/serverUtil';
 
 export {
   createPersistedQueryMiddleware,
+  getMiddlewareForQueryMap,
 };
 
