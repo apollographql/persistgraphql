@@ -10,6 +10,7 @@ import {
   FragmentDefinitionNode,
   print,
   DefinitionNode,
+  separateOperations,
 } from 'graphql';
 
 import {
@@ -143,26 +144,57 @@ export class ExtractGQL {
     });
   }
 
-  public processInputFile(inputFile: string): Promise<OutputMap> {
-    return new Promise<OutputMap>((resolve, reject) => {
+  // Creates an OutputMap from an array of GraphQL documents read as strings.
+  public createOutputMapFromString(docString: string): OutputMap {
+    const doc = parse(docString);
+    const docMap = separateOperations(doc);
+        
+    const resultMaps = Object.keys(docMap).map((operationName) => {
+      const document = docMap[operationName];
+      return this.createMapFromDocument(document);
+    });
+
+    return (_.merge({} as OutputMap, ...resultMaps) as OutputMap);
+  }
+  
+  public readGraphQLFile(graphQLFile: string): Promise<string> {
+    return ExtractGQL.readFile(graphQLFile);
+  }
+  
+  public readInputFile(inputFile: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       const extension = ExtractGQL.getFileExtension(inputFile);
       switch (extension) {
         case 'graphql':
-        resolve(this.processGraphQLFile(inputFile));
+        this.readGraphQLFile(inputFile).then((result) => {
+          resolve(result);
+        }).catch((err) => {
+          reject(err);
+        });
         break;
 
         default:
-        resolve({});
+        resolve('');
         break;
       }
     });
   }
 
-  // Processes an input path, which may be a path to a GraphQL file,
-  // a TypeScript file or a Javascript file. Returns a map going from
-  // a hash to a query document.
+  // Processes an input path, which may be a path to a GraphQL file
+  // or a directory containing GraphQL files. Creates an OutputMap
+  // instance from these files.
   public processInputPath(inputPath: string): Promise<OutputMap> {
     return new Promise<OutputMap>((resolve, reject) => {
+      this.readInputPath(inputPath).then((docString: string) => {
+        resolve(this.createOutputMapFromString(docString));
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  }
+    
+  public readInputPath(inputPath: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       ExtractGQL.isDirectory(inputPath).then((isDirectory) => {
         if (isDirectory) {
           console.log(`Crawling ${inputPath}...`);
@@ -171,18 +203,17 @@ export class ExtractGQL {
             if (err) {
               reject(err);
             }
-            const promises: Promise<OutputMap>[] = items.map((item) => {
-              return this.processInputPath(inputPath + '/' + item);
+            const promises: Promise<string>[] = items.map((item) => {
+              return this.readInputPath(inputPath + '/' + item);
             });
 
-            Promise.all(promises).then((resultMaps: OutputMap[]) => {
-              resolve(_.merge({} as OutputMap, ...resultMaps) as OutputMap);
+            Promise.all(promises).then((queryStrings: string[]) => {
+              resolve(queryStrings.reduce((x, y) => x + y));
             });
           });
-          // TODO recurse over the files in this directory
         } else {
-          this.processInputFile(inputPath).then((outputMap: OutputMap) => {
-            resolve(outputMap);
+          this.readInputFile(inputPath).then((result: string) => {
+            resolve(result);
           }).catch((err) => {
             console.log(`Error occurred in processing path ${inputPath}: `);
             console.log(err.message);

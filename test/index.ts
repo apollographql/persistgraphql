@@ -345,25 +345,20 @@ describe('ExtractGQL', () => {
     });
   });
 
-  describe('processInputFile', () => {
-    it('should return an empty map on a file with an unknown extension', (done) => {
-      egql.processInputFile('./test/fixtures/bad.c').then((documentMap) => {
-        assert.deepEqual(documentMap, {});
+  describe('readInputFile', () => {
+    it('should return an empty string on a file with an unknown extension', (done) => {
+      egql.readInputFile('./test/fixtures/bad.c').then((result: string) => {
+        assert.deepEqual(result, '');
         done();
       });
     });
 
     it('should correctly process a file with a .graphql extension', (done) => {
-      egql.processInputFile('./test/fixtures/queries.graphql').then((result: OutputMap) => {
-        assert.equal(Object.keys(result).length, 2);
-        assert.equal(
-          print(result[keys[0]].transformedQuery),
-          print(createDocumentFromQuery(queries.definitions[0]))
-        );
-        assert.equal(
-          print(result[keys[1]].transformedQuery),
-          print(createDocumentFromQuery(queries.definitions[1]))
-        );
+      egql.readInputFile('./test/fixtures/queries.graphql').then((result: string) => {
+        assert.equal(result.split('\n').length, 14);
+        assert.include(result, 'query {');
+        assert.include(result, 'person {');
+        assert.include(result, 'lastName');
         done();
       });
     });
