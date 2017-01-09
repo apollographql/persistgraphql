@@ -74,7 +74,7 @@ describe('serverUtil', () => {
       const errorHandler = () => {
         done();
       };
-      createPersistedQueryMiddleware(queryMapPath, errorHandler).then((middleware) => {
+      createPersistedQueryMiddleware(queryMapPath, true, errorHandler).then((middleware) => {
         assert(middleware);
         const expressRequest = { body: req };
         middleware(expressRequest as Request, null, next);
@@ -92,7 +92,7 @@ describe('serverUtil', () => {
       const errorHandler = () => {
         done();
       };
-      createPersistedQueryMiddleware(queryMapPath, errorHandler).then((middleware) => {
+      createPersistedQueryMiddleware(queryMapPath, true, errorHandler).then((middleware) => {
         assert(middleware);
         const expressRequest = { body: req };
         middleware(expressRequest as Request, null, next);
