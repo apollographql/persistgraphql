@@ -98,5 +98,24 @@ describe('serverUtil', () => {
         middleware(expressRequest as Request, null, next);
       });
     });
+
+    it('should pass along requests untouched if production is false', (done) => {
+      const req = {
+        query: gql`{ root }`,
+      };
+      const next = () => {
+        assert.equal(Object.keys(req).length, 1);
+        assert.deepEqual(req.query, gql`{ root }`);
+        done();
+      };
+      const errorHandler = () => {
+        done(new Error('Should not have errored here.'));
+      };
+      createPersistedQueryMiddleware(queryMapPath, false, errorHandler).then((middleware) => {
+        assert(middleware);
+        const expressRequest = { body: req };
+        middleware(expressRequest as Request, null, next);
+      });
+    });
   });
 });
