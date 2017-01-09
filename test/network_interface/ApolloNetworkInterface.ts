@@ -3,11 +3,16 @@ const { assert } = chai;
 
 import {
   ExecutionResult,
+  print,
 } from 'graphql';
 
 import gql from 'graphql-tag';
 import * as fetchMock from 'fetch-mock';
 const _ = require('lodash');
+
+import {
+  parse
+} from 'graphql';
 
 import {
   PersistedQueryNetworkInterface,
@@ -28,6 +33,27 @@ describe('PersistedQueryNetworkInterface', () => {
     assert.deepEqual(pni.queryMap, {});
   });
 
+  it('should not use query mapping when not in a production environment', (done) => {
+    const fetchUri = 'http://fake.com/fake';
+    const query = gql`query { author }`;
+    
+    fetchMock.post(fetchUri, (url: string, opts: Object) => {
+      const requestQuery =  parse(JSON.parse((opts as RequestInit).body.toString()).query);
+      assert.equal(print(requestQuery), print(query));
+      fetchMock.restore();
+      done();
+      return null;
+    });
+    
+    const pni = new PersistedQueryNetworkInterface({
+      uri: fetchUri,
+      queryMap: {},
+      production: false,
+    });
+    pni.query({ query });
+  });
+                    
+  
   it('should fail to work when asked to lookup nonmapped query', (done) => {
     const pni = new PersistedQueryNetworkInterface({
       uri: 'http://fake.com/fake',
