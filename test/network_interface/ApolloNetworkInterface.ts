@@ -33,7 +33,7 @@ describe('PersistedQueryNetworkInterface', () => {
     assert.deepEqual(pni.queryMap, {});
   });
 
-  it('should not use query mapping when not in a production environment', (done) => {
+  it('should not use query mapping when enablePersistedQueries = false', (done) => {
     const fetchUri = 'http://fake.com/fake';
     const query = gql`query { author }`;
     
@@ -48,7 +48,7 @@ describe('PersistedQueryNetworkInterface', () => {
     const pni = new PersistedQueryNetworkInterface({
       uri: fetchUri,
       queryMap: {},
-      production: false,
+      enablePersistedQueries: false,
     });
     pni.query({ query });
   });

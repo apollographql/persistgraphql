@@ -15,11 +15,12 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
   public queryMap: OutputMap = {};
   public _opts: RequestInit;
   public _uri: string;
-  public production: boolean;
+  public enablePersistedQueries: boolean;
   
   // Constructor for this class.
   // 
-  // @param production Determines whether this is a production environment. Only does query mapping if this option is passed as true.
+  // @param enablePersistedQueries Determines whether or not to use persisted queries or just
+  // send the query document string over the wire.
   //
   // @param uri URI of the GraphQL endpoint to which this network interface will send requests.
   //
@@ -27,12 +28,12 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
   //
   // @param opts The set of options passed to fetch.
   constructor({
-    production = true,
+    enablePersistedQueries = true,
     uri,
     queryMap,
     opts = {},
   }: {
-    production?: boolean,
+    enablePersistedQueries?: boolean,
     uri: string,
     queryMap: OutputMap,
     opts?: RequestInit,
@@ -41,7 +42,7 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     this._uri = uri;
     this._opts = opts;
     this.queryMap = queryMap;
-    this.production = production;
+    this.enablePersistedQueries = enablePersistedQueries;
   }
 
   // Overriden function from HTTPFetchNetworkInterface. Instead of sending down the entire
@@ -51,9 +52,9 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     request,
     options,
   }: RequestAndOptions): Promise<IResponse> {
-    // If we are not in a production environment, this should just use the
+    // If we are not in an enablePersistedQueries environment, this should just use the
     // standard network interface.
-    if (!this.production) {
+    if (!this.enablePersistedQueries) {
       return super.fetchFromRemoteEndpoint({ request, options });
     }
     
