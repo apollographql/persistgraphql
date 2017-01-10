@@ -11,7 +11,7 @@ import * as fetchMock from 'fetch-mock';
 const _ = require('lodash');
 
 import {
-  parse
+  parse,
 } from 'graphql';
 
 import {
@@ -36,7 +36,7 @@ describe('PersistedQueryNetworkInterface', () => {
   it('should not use query mapping when enablePersistedQueries = false', (done) => {
     const fetchUri = 'http://fake.com/fake';
     const query = gql`query { author }`;
-    
+
     fetchMock.post(fetchUri, (url: string, opts: Object) => {
       const requestQuery =  parse(JSON.parse((opts as RequestInit).body.toString()).query);
       assert.equal(print(requestQuery), print(query));
@@ -44,7 +44,7 @@ describe('PersistedQueryNetworkInterface', () => {
       done();
       return null;
     });
-    
+
     const pni = new PersistedQueryNetworkInterface({
       uri: fetchUri,
       queryMap: {},
@@ -52,8 +52,8 @@ describe('PersistedQueryNetworkInterface', () => {
     });
     pni.query({ query });
   });
-                    
-  
+
+
   it('should fail to work when asked to lookup nonmapped query', (done) => {
     const pni = new PersistedQueryNetworkInterface({
       uri: 'http://fake.com/fake',
@@ -204,7 +204,7 @@ describe('PersistedQueryNetworkInterface', () => {
       firstName: 'John',
       lastName: 'Smith',
     };
-    
+
     const queryMap = egql.createMapFromDocument(queriesDocument);
     const uri = 'http://fake.com/fakegraphql';
     const pni = new PersistedQueryNetworkInterface({

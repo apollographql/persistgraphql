@@ -16,9 +16,9 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
   public _opts: RequestInit;
   public _uri: string;
   public enablePersistedQueries: boolean;
-  
+
   // Constructor for this class.
-  // 
+  //
   // @param enablePersistedQueries Determines whether or not to use persisted queries or just
   // send the query document string over the wire.
   //
@@ -57,13 +57,13 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     if (!this.enablePersistedQueries) {
       return super.fetchFromRemoteEndpoint({ request, options });
     }
-    
+
     const queryDocument = request.query;
     const operationDefinitions = getOperationDefinitions(queryDocument);
     if (operationDefinitions.length !== 1) {
       throw new Error('Multiple queries in a single document.');
     }
-    
+
     const queryKey = getQueryKey(operationDefinitions[0]);
     if (!this.queryMap[queryKey]) {
       throw new Error('Could not find query inside query map.');

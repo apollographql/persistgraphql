@@ -127,12 +127,12 @@ describe('serverUtil', () => {
         id: 18,
       },
     };
-    
+
     it('should call the query map function with correct id', (done) => {
       const queryMapFunc = (queryId: (number | string)) => {
         assert.equal(queryId, expressRequest.body.id);
         done();
-        return Promise.resolve("");
+        return Promise.resolve('');
       };
 
       getMiddlewareForQueryMapFunction(queryMapFunc)(expressRequest as Request, null, null);

@@ -79,7 +79,7 @@ export function getMiddlewareForQueryMap(
     }
 
     return Promise.resolve(print(queryMap[matchedKeys[0]].transformedQuery));
-  }
+  };
 
   return getMiddlewareForQueryMapFunction(queryMapFunc, enablePersistedQueries, lookupErrorHandler);
 }
