@@ -131,7 +131,7 @@ export class ExtractGQL {
   }
 
   // Given the path to a particular `.graphql` file, read it, extract the queries
-  // and return the promise to an OutputMap.
+  // and return the promise to an OutputMap. Used primarily for unit tests.
   public processGraphQLFile(graphQLFile: string): Promise<OutputMap> {
     return new Promise<OutputMap>((resolve, reject) => {
       ExtractGQL.readFile(graphQLFile).then((fileContents) => {
@@ -236,25 +236,6 @@ export class ExtractGQL {
     retDocument.definitions = document.definitions.filter((definition: DefinitionNode) => {
       const definitionName = (definition as (FragmentDefinitionNode | OperationDefinitionNode)).name;
       return (isFragmentDefinition(definition) && queryFragmentNames[definitionName.value] === 1);
-    });
-    return retDocument;
-  }
-
-  // Takes a document and a query definition contained within that document. Then, extracts the
-  // fragments that the query depends on from the document and returns a document with these
-  // fragments and the specified query definition (note that the query definition must be the
-  // reference to the query definition contained with the document structure). Input document
-  // may be mutated.
-  public trimDocumentForQuery(document: DocumentNode, queryDefinition: OperationDefinitionNode): DocumentNode {
-    const queryFragmentNames = getFragmentNames(queryDefinition.selectionSet, document);
-    const retDocument: DocumentNode = {
-      kind: 'Document',
-      definitions: [],
-    };
-    retDocument.definitions = document.definitions.filter((definition: DefinitionNode) => {
-      const name = (definition as (OperationDefinitionNode | FragmentDefinitionNode)).name;
-      return ((isFragmentDefinition(definition) && queryFragmentNames[name.value] === 1)
-              || definition === queryDefinition);
     });
     return retDocument;
   }
