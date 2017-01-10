@@ -63,17 +63,7 @@ export function getMiddlewareForQueryMap(
   production: boolean = true,
   lookupErrorHandler?: Handler,
 ): Handler {
-  // If we are not in a production environment, then we don't want to do any query mapping
-  // and we move to the next request handler.
-  if (!production) {
-    return ((req: Request, res: Response, next: any) => {
-      next();
-    });
-  }
-  
-  return ((req: Request, res: Response, next: any) => {
-    const queryId = req.body.id as (number | string);
-
+  const queryMapFunc = (queryId: (string | number)) => {
     // TODO this can be made O(1) if we have a reversible structure than a unidirectional
     // hash map.
     const matchedKeys = Object.keys(queryMap).filter((key) => {
@@ -81,14 +71,56 @@ export function getMiddlewareForQueryMap(
               queryMap[key].id.toString() === queryId.toString());
     });
 
-    // If we find no keys with then given id, then we just let the lookupErrorHandler
-    // take care of the situation.
+    // If we find no keys with then given id, then we just return
+    // a false-y value.
     if (matchedKeys.length === 0 && lookupErrorHandler) {
-      lookupErrorHandler(req, res, next);
-      return;
+      return Promise.reject(null);
     }
 
-    req.body.query = print(queryMap[matchedKeys[0]].transformedQuery);
-    next();
+    return Promise.resolve(print(queryMap[matchedKeys[0]].transformedQuery));
+  }
+
+  return getMiddlewareForQueryMapFunction(queryMapFunc, production, lookupErrorHandler);
+}
+
+// The same thing as `createPersistedQueryMiddleware` but takes a function that,
+// when evaluated for a particular query id, returns a Promise for the corresponding
+// query string. Can be used to load persisted queries from a database rather than from
+// a JSON file.
+//
+// @param queryMapFunc  Function from query ids to Promises for graphql document strings.
+// Should reject the promise if the query id does not correspond to the graphql document
+// string.
+//
+// @param production  Boolean specifying whether this is a production environment. This
+// middlware will only perform query mapping if this option is true.
+//
+// @param lookupErrorHandler  An Express handler that is called when a query cannot be
+// found in the query map. Only relevant if in ap roduction environment.
+export type QueryMapFunction = (queryId: (string | number)) => Promise<string>;
+export function getMiddlewareForQueryMapFunction(
+  queryMapFunc: QueryMapFunction,
+  production: boolean = true,
+  lookupErrorHandler?: Handler,
+): Handler {
+  // If we are not in a production environment, then we don't want to do any query mapping
+  // and we move to the next request handler.
+  if (!production) {
+    return ((req: Request, res: Response, next: any) => {
+      next();
+    });
+  }
+
+  return ((req: Request, res: Response, next: any) => {
+    const queryId = req.body.id as (number | string);
+    queryMapFunc(queryId).then((queryString) => {
+      req.body.query = queryString;
+      next();
+    }).catch((err) => {
+      // If we find no keys with then given id, then we just let the lookupErrorHandler
+      // take care of the situation.
+      lookupErrorHandler(req, res, next);
+    });
   });
 }
+

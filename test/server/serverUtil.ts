@@ -10,6 +10,8 @@ import {
 
 import {
   createPersistedQueryMiddleware,
+  getMiddlewareForQueryMapFunction,
+  QueryMapFunction,
 } from '../../src/server/serverUtil';
 
 import {
@@ -116,6 +118,40 @@ describe('serverUtil', () => {
         const expressRequest = { body: req };
         middleware(expressRequest as Request, null, next);
       });
+    });
+  });
+
+  describe('getMiddlewareForQueryFunction', () => {
+    const expressRequest = {
+      body: {
+        id: 18,
+      },
+    };
+    
+    it('should call the query map function with correct id', (done) => {
+      const queryMapFunc = (queryId: (number | string)) => {
+        assert.equal(queryId, expressRequest.body.id);
+        done();
+        return Promise.resolve("");
+      };
+
+      getMiddlewareForQueryMapFunction(queryMapFunc)(expressRequest as Request, null, null);
+    });
+
+    it('should call the error handler if the function rejects promise', (done) => {
+      const queryMapFunc: QueryMapFunction = (queryId) => {
+        return Promise.reject(null);
+      };
+
+      const errorHandler = () => {
+        done();
+      };
+
+      getMiddlewareForQueryMapFunction(queryMapFunc, true, errorHandler)(
+        expressRequest as Request,
+        null,
+        null
+      );
     });
   });
 });
