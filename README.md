@@ -2,9 +2,9 @@
 
 `extractgql` is a simple build tool that enables query whitelisting and persisted queries for GraphQL projects that use statically analyze-able GraphQL queries.
 
-It scans a code directory and extracts GraphQL query documents from both `.graphql` files. It then assigns these queries ID values/hashes and produces a JSON file which maps from queries to hashes/IDs. This map can then be used by the client and server to perform query whitelisting, query lookups (i.e. client only sends the hash/id, the server just looks up the corresponding query), etc.
+It scans a code directory and extracts GraphQL query documents from `.graphql` files. It then assigns these queries ID values/hashes and produces a JSON file which maps from queries to hashes/IDs. This map can then be used by the client and server to perform query whitelisting, query lookups (i.e. client only sends the hash/id, the server just looks up the corresponding query), etc.
 
-The npm package also provides a network interface for [Apollo Client](https://github.com/apollostack/apollo-client) that manages the query lookups in `extractgql/lib/browser` and middleware for Express servers within `extractgql/lib/server`. These will likely be moved to their own packages in the future to reduce bundle size.
+The npm package also provides a network interface for [Apollo Client](https://github.com/apollostack/apollo-client) that manages the query lookups in `extractgql/lib/browser` and middleware for Express servers in `extractgql/lib/server`. These will likely be moved to their own packages in the future to reduce bundle size.
 
 # Installation
 For only the CLI tool:
@@ -27,11 +27,9 @@ The build tool binary is called `extractgql`. Running it with no other arguments
 Usage: extractgql input_file [output file] [--add_typename]
 ```
 
-It can be called on a Javascript/Typescript file or a file containing GraphQL query definitions with extension `.graphql`:
+It can be called on a file containing GraphQL query definitions with extension `.graphql`:
 
 ```shell
-extractgql index.js
-extractgql index.ts
 extractgql queries.graphql
 ```
 
