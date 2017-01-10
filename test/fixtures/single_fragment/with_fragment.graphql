@@ -1,0 +1,9 @@
+#import "./fragment.graphql"
+# Note that as per the current implementation, the above line
+# doesn't do anything but we have it here because this is probably
+# what a real query that uses graphql-tag/loader would look like.
+query {
+  author {
+    ...details
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "extractgql",
+  "version": "0.2.1",
+  "description": "A build tool for GraphQL projects.",
+  "main": "lib/src/index.js",
+  "scripts": {
+    "pretest": "npm run compile",
+    "test": "mocha --reporter spec --full-trace lib/test/tests.js",
+    "posttest": "npm run lint",
+    "compile": "tsc",
+    "lint": "tslint -c tslint.json test/**/*.ts; tslint src/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Poincare/apollo-query-whitelisting.git"
+  },
+  "author": "Dhaivat Pandya",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Poincare/apollo-query-whitelisting/issues"
+  },
+  "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
+  "bin": {
+    "extractgql": "./bin/extractgql"
+  },
+  "dependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/lodash": "^4.14.37",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
+    "@types/yargs": "^6.5.0",
+    "chai": "^3.5.0",
+    "es6-promise": "^4.0.5",
+    "graphql": "^0.7.2",
+    "graphql-tag": "^0.1.14",
+    "lodash": "^4.16.4",
+    "mocha": "^3.1.2",
+    "source-map-support": "^0.4.3",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.3",
+    "whatwg-fetch": "^2.0.0",
+    "yargs": "^6.5.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.0.34",
+    "@types/graphql": "^0.8.5",
+    "apollo-client": "^0.6",
+    "fetch-mock": "^5.5.0",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
