@@ -35,13 +35,13 @@ import {
 // associated query, e.g. if a query id arrives that has no associated query.
 export function createPersistedQueryMiddleware(
   queryMapPath: string,
-  production: boolean = true,
+  enablePersistedQueries: boolean = true,
   lookupErrorHandler?: Handler,
 ): Promise<Handler> {
   return new Promise<Handler>((resolve, reject) => {
     ExtractGQL.readFile(queryMapPath).then((queryMapString) => {
       const queryMap = JSON.parse(queryMapString);
-      resolve(getMiddlewareForQueryMap(queryMap, production, lookupErrorHandler));
+      resolve(getMiddlewareForQueryMap(queryMap, enablePersistedQueries, lookupErrorHandler));
     }).catch((err: Error) => {
       reject(err);
     });
@@ -53,14 +53,15 @@ export function createPersistedQueryMiddleware(
 //
 // @param queryMap Map of queries outputted by the extractgql CLI tool
 //
-// @param production Boolean specifying whether this is a production environment. This middleware
-// will only perform query mapping if this option is true.
+// @param enablePersistedQueries Boolean specifying whether to perform query mapping. If set to
+// `false`, this middleware will just send the GraphQL document strings like a normal network
+// interface.
 //
 // @param lookupErrorHandler An Express handler that is called when a query cannot be found
-// in the query map. Only relevant if in a production environment.
+// in the query map. Only relevant if `enablePersistedQueries` is set to `true`.
 export function getMiddlewareForQueryMap(
   queryMap: OutputMap,
-  production: boolean = true,
+  enablePersistedQueries: boolean = true,
   lookupErrorHandler?: Handler,
 ): Handler {
   const queryMapFunc = (queryId: (string | number)) => {
@@ -80,7 +81,7 @@ export function getMiddlewareForQueryMap(
     return Promise.resolve(print(queryMap[matchedKeys[0]].transformedQuery));
   }
 
-  return getMiddlewareForQueryMapFunction(queryMapFunc, production, lookupErrorHandler);
+  return getMiddlewareForQueryMapFunction(queryMapFunc, enablePersistedQueries, lookupErrorHandler);
 }
 
 // The same thing as `createPersistedQueryMiddleware` but takes a function that,
@@ -92,20 +93,21 @@ export function getMiddlewareForQueryMap(
 // Should reject the promise if the query id does not correspond to the graphql document
 // string.
 //
-// @param production  Boolean specifying whether this is a production environment. This
-// middlware will only perform query mapping if this option is true.
+// @param enablePersistedQueries  Boolean specifying whether to perform query mapping. If set to
+// `false`, this middleware will just send the GraphQL document strings like a normal network
+// interface.
 //
 // @param lookupErrorHandler  An Express handler that is called when a query cannot be
 // found in the query map. Only relevant if in ap roduction environment.
 export type QueryMapFunction = (queryId: (string | number)) => Promise<string>;
 export function getMiddlewareForQueryMapFunction(
   queryMapFunc: QueryMapFunction,
-  production: boolean = true,
+  enablePersistedQueries: boolean = true,
   lookupErrorHandler?: Handler,
 ): Handler {
-  // If we are not in a production environment, then we don't want to do any query mapping
+  // If we are not in a enablePersistedQueries environment, then we don't want to do any query mapping
   // and we move to the next request handler.
-  if (!production) {
+  if (!enablePersistedQueries) {
     return ((req: Request, res: Response, next: any) => {
       next();
     });
