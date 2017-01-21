@@ -41,6 +41,7 @@ describe('ExtractGQL', () => {
         lastName
       }
     }`;
+
   const egql = new ExtractGQL({ inputFilePath: 'not-real'});
   const keys = [
     egql.getQueryKey(queries.definitions[0]),
