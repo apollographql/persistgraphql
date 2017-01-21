@@ -39,6 +39,14 @@ import {
 
 import _ = require('lodash');
 
+export type ExtractGQLOptions = {
+  inputFilePath: string,
+  outputFilePath?: string,
+  queryTransformers?: QueryTransformer[],
+  extension?: string,
+  inJsCode?: boolean,
+}
+
 export class ExtractGQL {
   public inputFilePath: string;
   public outputFilePath: string;
@@ -101,13 +109,7 @@ export class ExtractGQL {
     queryTransformers = [],
     extension = 'graphql',
     inJsCode = false,
-  }: {
-    inputFilePath: string,
-    outputFilePath?: string,
-    queryTransformers?: QueryTransformer[],
-    extension?: string,
-    inJsCode?: boolean,
-  }) {
+  }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
@@ -327,9 +329,19 @@ export const main = (argv: YArgsv) => {
     queryTransformers.push(addTypenameTransformer);
   }
 
-  new ExtractGQL({
+  const options: ExtractGQLOptions = {
     inputFilePath,
     outputFilePath,
     queryTransformers,
-  }).extract();
+  };
+
+  if (argv['js']) {
+    options.inJsCode = true;
+  }
+
+  if (argv['extension']) {
+    options.extension = argv['extension'];
+  }
+
+  new ExtractGQL(options).extract();
 };
