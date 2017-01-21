@@ -21,6 +21,11 @@ import {
 } from './extractFromAST';
 
 import {
+  findTaggedTemplateLiteralsInJS,
+  eliminateInterpolations,
+} from './extractFromJS';
+
+import {
   getQueryKey,
   applyQueryTransformers,
   TransformedQueryWithId,
@@ -44,6 +49,15 @@ export class ExtractGQL {
   // List of query transformers that a query is put through (left to right)
   // before being written as a transformedQuery within the OutputMap.
   public queryTransformers: QueryTransformer[] = [];
+
+  // The file extension to load queries from
+  public extension: string;
+
+  // Whether to look for standalone .graphql files or template literals in JavaScript code
+  public inJsCode: boolean = false;
+
+  // The template literal tag for GraphQL queries in JS code
+  public literalTag: string = 'gql';
 
   // Given a file path, this returns the extension of the file within the
   // file path.
@@ -85,14 +99,20 @@ export class ExtractGQL {
     inputFilePath,
     outputFilePath = 'extracted_queries.json',
     queryTransformers = [],
+    extension = 'graphql',
+    inJsCode = false,
   }: {
     inputFilePath: string,
     outputFilePath?: string,
     queryTransformers?: QueryTransformer[],
+    extension?: string,
+    inJsCode?: boolean,
   }) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
+    this.extension = extension;
+    this.inJsCode = inJsCode;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -110,7 +130,7 @@ export class ExtractGQL {
   public getQueryKey(definition: OperationDefinitionNode): string {
     return getQueryKey(definition, this.queryTransformers);
   }
-  
+
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: DocumentNode): OutputMap {
@@ -148,7 +168,7 @@ export class ExtractGQL {
   public createOutputMapFromString(docString: string): OutputMap {
     const doc = parse(docString);
     const docMap = separateOperations(doc);
-        
+
     const resultMaps = Object.keys(docMap).map((operationName) => {
       const document = docMap[operationName];
       return this.createMapFromDocument(document);
@@ -156,26 +176,29 @@ export class ExtractGQL {
 
     return (_.merge({} as OutputMap, ...resultMaps) as OutputMap);
   }
-  
+
   public readGraphQLFile(graphQLFile: string): Promise<string> {
     return ExtractGQL.readFile(graphQLFile);
   }
-  
-  public readInputFile(inputFile: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const extension = ExtractGQL.getFileExtension(inputFile);
-      switch (extension) {
-        case 'graphql':
-        this.readGraphQLFile(inputFile).then((result) => {
-          resolve(result);
-        }).catch((err) => {
-          reject(err);
-        });
-        break;
 
-        default:
-        resolve('');
-        break;
+  public readInputFile(inputFile: string): Promise<string> {
+    return Promise.resolve().then(() => {
+      const extension = ExtractGQL.getFileExtension(inputFile);
+
+      if (extension === this.extension) {
+        if (this.inJsCode) {
+          // Read from a JS file
+          return ExtractGQL.readFile(inputFile).then((result) => {
+            const literalContents = findTaggedTemplateLiteralsInJS(result, this.literalTag);
+            const noInterps = literalContents.map(eliminateInterpolations);
+            const joined = noInterps.join('\n');
+            return joined;
+          })
+        } else {
+          return this.readGraphQLFile(inputFile);
+        }
+      } else {
+        return '';
       }
     });
   }
@@ -192,7 +215,7 @@ export class ExtractGQL {
       });
     });
   }
-    
+
   public readInputPath(inputPath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       ExtractGQL.isDirectory(inputPath).then((isDirectory) => {
