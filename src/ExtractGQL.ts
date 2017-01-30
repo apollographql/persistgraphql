@@ -289,7 +289,7 @@ export const main = (argv: YArgsv) => {
   const queryTransformers: QueryTransformer[] = [];
 
   if (args.length < 1) {
-    console.log('Usage: extractgql input_file [output_file]');
+    console.log('Usage: persistgraphql input_file [output_file]');
   } else if (args.length === 1) {
     inputFilePath = args[0];
   } else {
