@@ -1,5 +1,5 @@
 {
-  "name": "extractgql",
+  "name": "persistgraphql",
   "version": "0.2.1",
   "description": "A build tool for GraphQL projects.",
   "main": "lib/src/index.js",
@@ -17,11 +17,11 @@
   "author": "Dhaivat Pandya",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Poincare/apollo-query-whitelisting/issues"
+    "url": "https://github.com/Poincare/persistgraphql/issues"
   },
-  "homepage": "https://github.com/Poincare/apollo-query-whitelisting#readme",
+  "homepage": "https://github.com/Poincare/persistgraphql#readme",
   "bin": {
-    "extractgql": "./bin/extractgql"
+    "persistgraphql": "./bin/persistgraphql"
   },
   "dependencies": {
     "@types/chai": "^3.4.34",
