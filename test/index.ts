@@ -41,6 +41,7 @@ describe('ExtractGQL', () => {
         lastName
       }
     }`;
+
   const egql = new ExtractGQL({ inputFilePath: 'not-real'});
   const keys = [
     egql.getQueryKey(queries.definitions[0]),
@@ -395,7 +396,7 @@ describe('ExtractGQL', () => {
       });
     });
 
-    it('should process a file with a fragment reference to a different file', (done) => {
+    it('should process a file with a fragment reference to a different file', () => {
       const expectedQuery = gql`
         query {
           author {
@@ -408,15 +409,45 @@ describe('ExtractGQL', () => {
         }
         `;
 
-      egql.processInputPath('./test/fixtures/single_fragment').then((result: OutputMap) => {
+      return egql.processInputPath('./test/fixtures/single_fragment').then((result: OutputMap) => {
         const keys = Object.keys(result);
         assert.equal(keys.length, 1);
         assert.equal(
           print(result[keys[0]].transformedQuery),
           print(expectedQuery)
         );
-        done();
       });
+    });
+
+    it('should process a JS file with queries', () => {
+      const expectedQuery = gql`
+        query {
+          author {
+            ...details
+          }
+        }
+        fragment details on Author {
+          firstName
+          lastName
+        }
+        `;
+
+      const jsEgql = new ExtractGQL({
+        inputFilePath: 'idk',
+        extension: 'js',
+        inJsCode: true,
+        outputFilePath: 'idk',
+      });
+
+      return jsEgql.processInputPath('./test/fixtures/single_fragment_js')
+        .then((result: OutputMap) => {
+          const keys = Object.keys(result);
+          assert.equal(keys.length, 1);
+          assert.equal(
+            print(result[keys[0]].transformedQuery),
+            print(expectedQuery)
+          );
+        });
     });
   });
 
