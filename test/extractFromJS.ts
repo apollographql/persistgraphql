@@ -19,11 +19,15 @@ describe('extractFromJS', () => {
       const query2 = gql\`y
 y
 y\`;
+
+      // Has a space before tag
+      const query3 = gql \`zzz\`;
     `;
 
     assert.deepEqual(findTaggedTemplateLiteralsInJS(jsFile, 'gql'), [
       'xxx',
       'y\ny\ny',
+      'zzz',
     ]);
   });
 
