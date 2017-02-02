@@ -1,0 +1,1 @@
+{"{\n  author {\n    ...details\n  }\n}\n\nfragment details on Author {\n  firstName\n  lastName\n}\n":1}
