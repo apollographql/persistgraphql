@@ -1,6 +1,8 @@
 import {
   FieldNode,
   SelectionSetNode,
+  DefinitionNode,
+  OperationDefinitionNode,
   DocumentNode,
   print,
 } from 'graphql';
@@ -16,7 +18,7 @@ import {
   isFragmentDefinition,
 } from './extractFromAST';
 
-const _ = require('lodash');
+import { cloneDeep } from 'lodash';
 
 // TODO Most of this implementation has been copped from here:
 // https://github.com/apollostack/apollo-client/blob/master/src/queries/queryTransform.ts
@@ -32,26 +34,14 @@ const TYPENAME_FIELD: FieldNode = {
   },
 };
 
-// Query transformer that adds a `__typename` field to every level of the document.
-export const addTypenameTransformer: QueryTransformer = (document: DocumentNode) => {
-  const docClone: DocumentNode = _.cloneDeep(document);
-  docClone.definitions.forEach((definition) => {
-    if (isOperationDefinition(definition) || isFragmentDefinition(definition)) {
-      addTypenameToSelectionSet(definition.selectionSet, true);
-    }
-  });
-  return docClone;
-};
-
-// Internal function that adds a `__typename` field to every level of a given selection set.
 function addTypenameToSelectionSet(
   selectionSet: SelectionSetNode,
   isRoot = false,
 ) {
-  if (selectionSet && selectionSet.selections) {
+  if (selectionSet.selections) {
     if (! isRoot) {
       const alreadyHasThisField = selectionSet.selections.some((selection) => {
-        return isField(selection) && (selection as FieldNode).name.value === '__typename';
+        return selection.kind === 'Field' && (selection as FieldNode).name.value === '__typename';
       });
 
       if (! alreadyHasThisField) {
@@ -60,9 +50,22 @@ function addTypenameToSelectionSet(
     }
 
     selectionSet.selections.forEach((selection) => {
-      if (isField(selection) || isInlineFragment(selection)) {
-        addTypenameToSelectionSet(selection.selectionSet);
+      if (selection.kind === 'Field' || selection.kind === 'InlineFragment') {
+        if (selection.selectionSet) {
+          addTypenameToSelectionSet(selection.selectionSet);
+        }
       }
     });
   }
 }
+
+export const addTypenameTransformer: QueryTransformer = (doc: DocumentNode) => {
+  const docClone = cloneDeep(doc);
+
+  docClone.definitions.forEach((definition: DefinitionNode) => {
+    const isRoot = definition.kind === 'OperationDefinition';
+    addTypenameToSelectionSet((definition as OperationDefinitionNode).selectionSet, isRoot);
+  });
+
+  return docClone;
+};
