@@ -8,7 +8,6 @@ import {
   OutputMap,
 } from '../common';
 
-import { getOperationDefinitions } from '../extractFromAST';
 const _ = require('lodash');
 
 export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
