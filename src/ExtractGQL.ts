@@ -27,6 +27,7 @@ import {
 
 import {
   getQueryKey,
+  getQueryDocumentKey,
   applyQueryTransformers,
   TransformedQueryWithId,
   OutputMap,
@@ -133,6 +134,14 @@ export class ExtractGQL {
     return getQueryKey(definition, this.queryTransformers);
   }
 
+  // Just calls getQueryDocumentKey with this.queryTransformers as its
+  // set of query transformers and returns a serialization of the query.
+  public getQueryDocumentKey(
+    document: DocumentNode
+  ): string {
+    return getQueryDocumentKey(document, this.queryTransformers);
+  }
+
   // Create an OutputMap from a GraphQL document that may contain
   // queries, mutations and fragments.
   public createMapFromDocument(document: DocumentNode): OutputMap {
@@ -140,14 +149,10 @@ export class ExtractGQL {
     const queryDefinitions = getOperationDefinitions(transformedDocument);
     const result: OutputMap = {};
     queryDefinitions.forEach((transformedDefinition) => {
-      const queryKey = this.getQueryKey(transformedDefinition);
       const transformedQueryWithFragments = this.getQueryFragments(transformedDocument, transformedDefinition);
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
-
-      result[queryKey] = {
-        transformedQuery: transformedQueryWithFragments,
-        id: this.getQueryId(),
-      };
+      const docQueryKey = this.getQueryDocumentKey(transformedQueryWithFragments);
+      result[docQueryKey] = this.getQueryId();
     });
     return result;
   }

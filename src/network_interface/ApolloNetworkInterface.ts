@@ -4,7 +4,7 @@ import {
 } from 'apollo-client/transport/networkInterface';
 
 import {
-  getQueryKey,
+  getQueryDocumentKey,
   OutputMap,
 } from '../common';
 
@@ -59,17 +59,12 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
     }
 
     const queryDocument = request.query;
-    const operationDefinitions = getOperationDefinitions(queryDocument);
-    if (operationDefinitions.length !== 1) {
-      throw new Error('Multiple queries in a single document.');
-    }
-
-    const queryKey = getQueryKey(operationDefinitions[0]);
+    const queryKey = getQueryDocumentKey(queryDocument);
     if (!this.queryMap[queryKey]) {
       throw new Error('Could not find query inside query map.');
     }
     const serverRequest = {
-      id: this.queryMap[queryKey].id,
+      id: this.queryMap[queryKey],
       variables: request.variables,
       operationName: request.operationName,
     };

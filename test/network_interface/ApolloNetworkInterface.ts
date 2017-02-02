@@ -80,34 +80,6 @@ describe('PersistedQueryNetworkInterface', () => {
     });
   });
 
-  it('should fail to work when asked to process a query within multiple definitions', (done) => {
-    const pni = new PersistedQueryNetworkInterface({
-      uri: 'http://fake.com/fake',
-      queryMap: {},
-    });
-    const request = {
-      query: gql`
-        query {
-          author {
-            firstName
-          }
-        }
-        query {
-          person {
-            name
-          }
-        }
-      `,
-    };
-    pni.query(request).then(() => {
-      done(new Error('Result resolved when it should not have.'));
-    }).catch((err: Error) => {
-      assert(err);
-      assert.include(err.message, 'Multiple queries');
-      done();
-    });
-  });
-
   describe('sending query ids', () => {
     const egql = new ExtractGQL({ inputFilePath: 'nothing' });
     const queriesDocument = gql`

@@ -108,10 +108,9 @@ describe('ExtractGQL', () => {
         name
       }`;
       const map = myegql.createMapFromDocument(document);
-      const key = egql.getQueryKey(document.definitions[0]);
+      const key = egql.getQueryDocumentKey(document);
       assert.equal(Object.keys(map).length, 1);
-      assert.equal(print(map[key].transformedQuery), print(document));
-      assert.equal(map[key].id, 1);
+      assert.equal(map[key], 1);
     });
 
     it('should be able to handle a document with a fragment', () => {
@@ -128,10 +127,9 @@ describe('ExtractGQL', () => {
         }
       `;
       const map = myegql.createMapFromDocument(document);
-      const key = myegql.getQueryKey(document.definitions[0]);
+      const key = myegql.getQueryDocumentKey(document);
       assert.equal(Object.keys(map).length, 1);
-      assert.equal(print(map[key].transformedQuery), print(document));
-      assert.equal(map[key].id, 1);
+      assert.equal(map[key], 1);
     });
 
     it('should be able to handle a document with multiple fragments', () => {
@@ -151,8 +149,7 @@ describe('ExtractGQL', () => {
           author
         }`;
       const map = myegql.createMapFromDocument(document);
-      const key = myegql.getQueryKey(document.definitions[0]);
-      assert.equal(print(map[key].transformedQuery), print(document));
+      assert.equal(Object.keys(map)[0], print(document));
     });
 
     it('should be able to handle a document with unused fragments', () => {
@@ -170,9 +167,8 @@ describe('ExtractGQL', () => {
         }
       `;
       const map = egql.createMapFromDocument(document);
-      const key = myegql.getQueryKey(document.definitions[0]);
       assert.equal(
-        print(map[key].transformedQuery),
+        Object.keys(map)[0],
         print(createDocumentFromQuery(document.definitions[0]))
       );
     });
@@ -218,10 +214,13 @@ describe('ExtractGQL', () => {
         }
       `;
       const map = myegql.createMapFromDocument(document);
-      const key1 = myegql.getQueryKey(document.definitions[0]);
-      const key2 = myegql.getQueryKey(document.definitions[1]);
-      assert.equal(print(map[key1].transformedQuery), print(authorList));
-      assert.equal(print(map[key2].transformedQuery), print(authorInfo));
+      const key1 = myegql.getQueryDocumentKey(authorList);
+      const key2 = myegql.getQueryDocumentKey(authorInfo);
+      assert.equal(key1, print(authorList));
+      assert.property(map, key1);
+
+      assert.equal(key2, print(authorInfo));
+      assert.property(map, key2);
     });
 
     it('should be able to handle a document with multiple queries', () => {
@@ -233,16 +232,14 @@ describe('ExtractGQL', () => {
         name
       }`;
       const map = myegql.createMapFromDocument(document);
-      assert.deepEqual(map, {
-        [egql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: createDocumentFromQuery(document.definitions[0]),
-          id: 1,
-        },
-        [egql.getQueryKey(document.definitions[1])]: {
-          transformedQuery: createDocumentFromQuery(document.definitions[1]),
-          id: 2,
-        },
-      });
+      const keys = Object.keys(map);
+      assert.equal(keys.length, 2);
+      assert.include(keys, myegql.getQueryDocumentKey(
+        createDocumentFromQuery(document.definitions[0])
+      ));
+      assert.include(keys, myegql.getQueryDocumentKey(
+        createDocumentFromQuery(document.definitions[1])
+      ));
     });
 
     it('should be able to apply query transforms to a document with fragments', () => {
@@ -278,12 +275,9 @@ describe('ExtractGQL', () => {
       }`;
       const map = myegql.createMapFromDocument(document);
       assert.equal(Object.keys(map).length, 1);
-      const mapValue = map[myegql.getQueryKey(document.definitions[0])]
-      assert.equal(
-        print(mapValue.transformedQuery),
-        print(transformedDocument)
-      );
-      assert.equal(mapValue.id, 1);
+      const key = myegql.getQueryDocumentKey(transformedDocument);
+      assert.equal(Object.keys(map)[0], key);
+      assert.equal(map[key], 1);
     });
 
     it('should be able to handle a document with a mutation', () => {
@@ -294,12 +288,10 @@ describe('ExtractGQL', () => {
           lastName
         }`;
       const map = myegql.createMapFromDocument(document);
-      assert.deepEqual(map, {
-        [egql.getQueryKey(document.definitions[0])]: {
-          transformedQuery: createDocumentFromQuery(document.definitions[0]),
-          id: 1,
-        },
-      });
+      const keys = Object.keys(map);
+      assert.equal(keys.length, 1);
+      assert.equal(keys[0], myegql.getQueryDocumentKey(document));
+      assert.equal(map[keys[0]], 1);
     });
   });
 
@@ -327,13 +319,12 @@ describe('ExtractGQL', () => {
       const myegql = new ExtractGQL({ inputFilePath: 'empty' });
       myegql.addQueryTransformer(queryTransformer);
       const map = myegql.createMapFromDocument(originalDocument);
-
-      assert.deepEqual(map, {
-        [egql.getQueryKey(newQueryDef)]: {
-          id: 1,
-          transformedQuery: createDocumentFromQuery(newQueryDef),
-        },
-      });
+      const keys = Object.keys(map);
+      assert.equal(keys.length, 1);
+      assert.equal(
+        keys[0],
+        myegql.getQueryDocumentKey(newDocument)
+      );
     });
   });
 
@@ -369,12 +360,12 @@ describe('ExtractGQL', () => {
     it('should process a single file', (done) => {
       egql.processInputPath('./test/fixtures/single_query/queries.graphql').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(
-          print(result[keys[0]].transformedQuery),
+        assert.include(
+          Object.keys(result),
           print(createDocumentFromQuery(queries.definitions[0]))
         );
-        assert.equal(
-          print(result[keys[1]].transformedQuery),
+        assert.include(
+          Object.keys(result),
           print(createDocumentFromQuery(queries.definitions[1]))
         );
         done();
@@ -384,12 +375,12 @@ describe('ExtractGQL', () => {
     it('should process a directory with a single file', (done) => {
       egql.processInputPath('./test/fixtures/single_query').then((result: OutputMap) => {
         assert.equal(Object.keys(result).length, 2);
-        assert.equal(
-          print(result[keys[0]].transformedQuery),
+        assert.include(
+          Object.keys(result),
           print(createDocumentFromQuery(queries.definitions[0]))
         );
-        assert.equal(
-          print(result[keys[1]].transformedQuery),
+        assert.include(
+          Object.keys(result),
           print(createDocumentFromQuery(queries.definitions[1]))
         );
         done();
@@ -412,8 +403,8 @@ describe('ExtractGQL', () => {
       return egql.processInputPath('./test/fixtures/single_fragment').then((result: OutputMap) => {
         const keys = Object.keys(result);
         assert.equal(keys.length, 1);
-        assert.equal(
-          print(result[keys[0]].transformedQuery),
+        assert.include(
+          Object.keys(result),
           print(expectedQuery)
         );
       });
@@ -444,7 +435,7 @@ describe('ExtractGQL', () => {
           const keys = Object.keys(result);
           assert.equal(keys.length, 1);
           assert.equal(
-            print(result[keys[0]].transformedQuery),
+            keys[0],
             print(expectedQuery)
           );
         });

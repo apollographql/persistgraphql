@@ -68,8 +68,9 @@ export function getMiddlewareForQueryMap(
     // TODO this can be made O(1) if we have a reversible structure than a unidirectional
     // hash map.
     const matchedKeys = Object.keys(queryMap).filter((key) => {
+      console.log('Id: ', queryMap[key]);
       return (queryId !== undefined &&
-              queryMap[key].id.toString() === queryId.toString());
+              queryMap[key].toString() === queryId.toString());
     });
 
     // If we find no keys with then given id, then we just return
@@ -78,7 +79,7 @@ export function getMiddlewareForQueryMap(
       return Promise.reject(null);
     }
 
-    return Promise.resolve(print(queryMap[matchedKeys[0]].transformedQuery));
+    return Promise.resolve(matchedKeys[0]);
   };
 
   return getMiddlewareForQueryMapFunction(queryMapFunc, enablePersistedQueries, lookupErrorHandler);
@@ -125,4 +126,3 @@ export function getMiddlewareForQueryMapFunction(
     });
   });
 }
-

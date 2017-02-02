@@ -42,7 +42,7 @@ export function isQueryDefinition(defn: DefinitionNode): defn is OperationDefini
 }
 
 // Creates a query document out of a single query operation definition.
-export function createDocumentFromQuery(definition: OperationDefinitionNode) {
+export function createDocumentFromQuery(definition: OperationDefinitionNode): DocumentNode {
   return {
     kind: 'Document',
     definitions: [ definition ],

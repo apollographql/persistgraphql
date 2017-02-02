@@ -8,12 +8,13 @@ import {
   DocumentNode,
   print,
 } from 'graphql';
-  
+
 // A map from a key (id or a hash) to a GraphQL document.
 export interface OutputMap {
-  [key: string]: TransformedQueryWithId;
+  [key: string]: QueryId;
 }
 
+export type QueryId = number | string;
 export interface TransformedQueryWithId {
   transformedQuery: DocumentNode;
   id: number | string;
@@ -56,7 +57,7 @@ export function getQueryKey(
 // before making it a document key.
 export function getQueryDocumentKey(
   document: DocumentNode,
-  definition: OperationDefinitionNode
+  queryTransformers: QueryTransformer[] = [],
 ): string {
-  return print(this.applyQueryTransformers(this.trimDocumentForQuery(document, definition)));
+  return print(applyQueryTransformers(document, queryTransformers));
 }
