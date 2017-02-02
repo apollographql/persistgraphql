@@ -1,6 +1,6 @@
 {
   "name": "persistgraphql",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A build tool for GraphQL projects.",
   "main": "lib/src/index.js",
   "scripts": {
