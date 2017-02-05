@@ -20,6 +20,6 @@
     "src/binary.ts",
     "test/tests.ts",
     "fetch-mock.typings.d.ts",
-    "browser.ts"
+    "index.ts"
   ]
 }
