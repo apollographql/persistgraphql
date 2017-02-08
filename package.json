@@ -1,8 +1,8 @@
 {
   "name": "persistgraphql",
-  "version": "0.2.7",
+  "version": "0.2.10",
   "description": "A build tool for GraphQL projects.",
-  "main": "lib/src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
