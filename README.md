@@ -45,7 +45,7 @@ By default, the output will be palced in `extracted_queries.json`. An output fil
 persistgraphql index.ts output.json
 ```
 
-It can also take the `--add_typename` flag which will apply a query transformation to the query documents, adding the `__typename` field at every level of the query. You must pass this option if your client code uses this query transformation. 
+It can also take the `--add_typename` flag which will apply a query transformation to the query documents, adding the `__typename` field at every level of the query. You must pass this option if your client code uses this query transformation.
 
 ```
 persistgraphql src/ --add_typename
@@ -53,30 +53,25 @@ persistgraphql src/ --add_typename
 
 # Apollo Client Network Interface
 
-This package also provides an implementation of an Apollo Client network interface that provides persisted query support. It serves as a drop-in replacement for the standard network interface and uses the query map given by `persistgraphql` in order to send only query hashes/ids to the serverather than the query document. 
+This package also provides an implementation of an Apollo Client network interface that provides persisted query support. It serves as a drop-in replacement for the standard network interface and uses the query map given by `persistgraphql` in order to send only query hashes/ids to the serverather than the query document.
 
 See the implementation as well as some documentation for it within `src/network_interface/ApolloNetworkInterface.ts`.
 
-# Express middleware
+# Server-side
 
-This package also provides middleware for Express servers that maps a JSON object such as the following:
-
-```
-{
-    id: < query id >,
-    variables: < query variables >,
-    operationName: < query operation name >
-}
-```
-
-to the following:
+If you use the client network interface provided by this package, you can quickly roll your own middleware to get the GraphQL query instead of the query ID that the network interface sends. Here's an example with Express using the `lodash` `invert` method:
 
 ```
-{
-    query: < query >,
-    variables: < query variables >,
-    operationName: < query operation name >
-}
+import queryMap from ‘../extracted_queries.json’;
+import { invert } from 'lodash';
+app.use(
+  '/graphql',
+  (req, resp, next) => {
+    if (config.persistedQueries) {
+      const invertedMap = invert(queryMap);
+      req.body.query = invertedMap[req.body.id];
+    }
+    next();
+  },
+);
 ```
-
-That is, it maps query ids to the query document using the query map given by `persistgraphql`. See `src/server/serverUtil.ts` for the middleware methods and some documentation.
