@@ -2,7 +2,6 @@ import {
   HTTPFetchNetworkInterface,
   NetworkInterface,
   Request,
-  RequestAndOptions,
 } from 'apollo-client/transport/networkInterface';
 
 import {
@@ -13,8 +12,6 @@ import {
   getQueryDocumentKey,
   OutputMap,
 } from '../common';
-
-const _ = require('lodash');
 
 export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
   public queryMap: OutputMap = {};
@@ -57,6 +54,7 @@ export class PersistedQueryNetworkInterface extends HTTPFetchNetworkInterface {
 
 export function addPersistedQueries(networkInterface: NetworkInterface, queryMap: OutputMap) {
   const _query = networkInterface.query.bind(networkInterface);
+
   return Object.assign(networkInterface, {
     query: (request: Request): Promise<ExecutionResult> => {
       const queryDocument = request.query;
