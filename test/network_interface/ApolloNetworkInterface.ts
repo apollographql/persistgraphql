@@ -320,7 +320,7 @@ describe('PersistedQueryNetworkInterface', () => {
 
 describe('addPersistedQueries', () => {
   class GenericNetworkInterface implements NetworkInterface {
-    public query(originalQuery: Request) {
+    public query(originalQuery: Request): Promise<ExecutionResult> {
       return Promise.resolve(originalQuery);
     }
   }
@@ -346,6 +346,10 @@ describe('addPersistedQueries', () => {
         }
       }
     `,
+    variables: {
+      id: '1',
+    },
+    operationName: '2',
   };
 
   it('should error with an unmapped query', (done) => {
@@ -366,7 +370,11 @@ describe('addPersistedQueries', () => {
     const expectedId = queryMap[getQueryDocumentKey(request.query)];
     return networkInterface.query(request).then((persistedQuery) => {
       const id = _.get(persistedQuery, 'id');
+      const variables = _.get(persistedQuery, 'variables');
+      const operationName = _.get(persistedQuery, 'operationName');
       assert(id === expectedId, 'returned query id should equal expected document key');
+      assert(variables.id === '1', 'should pass through variables property');
+      assert(operationName === '2', 'should pass through operation name');
     });
   });
 });
