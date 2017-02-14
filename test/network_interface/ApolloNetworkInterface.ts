@@ -15,7 +15,17 @@ import {
 } from 'graphql';
 
 import {
+  NetworkInterface,
+  Request,
+} from 'apollo-client/transport/networkInterface';
+
+import {
+  getQueryDocumentKey,
+} from '../../src/common';
+
+import {
   PersistedQueryNetworkInterface,
+  addPersistedQueries,
 } from '../../src/network_interface/ApolloNetworkInterface';
 
 import {
@@ -304,6 +314,75 @@ describe('PersistedQueryNetworkInterface', () => {
         assert.deepEqual(result.data, mutationData);
         done();
       });
+    });
+  });
+});
+
+describe('addPersistedQueries', () => {
+  class GenericNetworkInterface implements NetworkInterface {
+    public query(originalQuery: Request): Promise<ExecutionResult> {
+      return Promise.resolve(originalQuery as ExecutionResult);
+    }
+  }
+
+  const egql = new ExtractGQL({ inputFilePath: 'nothing' });
+  const queriesDocument = gql`
+    query {
+      author {
+        firstName
+        lastName
+      }
+    }
+  `;
+
+  const queryMap = egql.createMapFromDocument(queriesDocument);
+
+  const request = {
+    query: gql`
+      query {
+        author {
+          firstName
+          lastName
+        }
+      }
+    `,
+    variables: {
+      id: '1',
+    },
+    operationName: '2',
+  };
+
+  it('should error with an unmapped query', (done) => {
+    const networkInterface = new GenericNetworkInterface();
+    addPersistedQueries(networkInterface, {});
+    networkInterface.query(request).then(() => {
+      done(new Error('Should not resolve'));
+    }).catch((err) => {
+      assert(err);
+      assert.include(err.message, 'Could not find');
+      done();
+    });
+  });
+
+  it('should pass through a query with the persisted query id', () => {
+    type persistedQueryType = {
+      id: string,
+      variables: {
+        id: string,
+      },
+      operationName: string,
+    }
+
+    const networkInterface = new GenericNetworkInterface();
+    addPersistedQueries(networkInterface, queryMap);
+    const expectedId = queryMap[getQueryDocumentKey(request.query)];
+    return networkInterface.query(request).then((persistedQuery: persistedQueryType) => {
+      const id = persistedQuery.id;
+      const variables = persistedQuery.variables;
+      const operationName = persistedQuery.operationName;
+      assert(id === expectedId, 'returned query id should equal expected document key');
+      assert(variables.id === '1', 'should pass through variables property');
+      assert(operationName === '2', 'should pass through operation name');
     });
   });
 });
