@@ -9,13 +9,13 @@ The npm package also provides a network interface for [Apollo Client](https://gi
 # Installation
 For only the CLI tool:
 
-```
+```shell
 npm install -g persistgraphql
 ```
 
 As a dependency (for Express middlware or Apollo Client network interface):
 
-```
+```shell
 npm install --save persistgraphql
 ```
 
@@ -39,7 +39,7 @@ It can also be called on a directory, which it will step through recursively:
 persistgraphql src/
 ```
 
-By default, the output will be palced in `extracted_queries.json`. An output file can be specified as the second argument:
+By default, the output will be placed in `extracted_queries.json`. An output file can be specified as the second argument:
 
 ```
 persistgraphql index.ts output.json
@@ -64,7 +64,7 @@ See the implementation as well as some documentation for it within `src/network_
 
 If you use the client network interface provided by this package, you can quickly roll your own middleware to get the GraphQL query instead of the query ID that the network interface sends. Here's an example with Express using the `lodash` `invert` method:
 
-```
+```js
 import queryMap from ‘../extracted_queries.json’;
 import { invert } from 'lodash';
 app.use(
