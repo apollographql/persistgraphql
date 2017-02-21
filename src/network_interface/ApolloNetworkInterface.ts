@@ -2,7 +2,7 @@ import {
   HTTPFetchNetworkInterface,
   NetworkInterface,
   Request,
-} from 'apollo-client/transport/networkInterface';
+} from 'apollo-client';
 
 import {
   ExecutionResult,
