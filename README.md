@@ -1,5 +1,7 @@
 # PersistGraphQL
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/apollographql/persistgraphql.svg)](https://greenkeeper.io/)
+
 `persistgraphql` is a simple build tool that enables query whitelisting and persisted queries for GraphQL projects that use statically analyze-able GraphQL queries.
 
 It scans a code directory and extracts GraphQL query documents from `.graphql` files. It then assigns these queries ID values/hashes and produces a JSON file which maps from queries to hashes/IDs. This map can then be used by the client and server to perform query whitelisting, query lookups (i.e. client only sends the hash/id, the server just looks up the corresponding query), etc.
