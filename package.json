@@ -1,6 +1,6 @@
 {
   "name": "persistgraphql",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A build tool for GraphQL projects.",
   "main": "lib/index.js",
   "scripts": {
@@ -36,7 +36,6 @@
     "lodash": "^4.16.4",
     "mocha": "^3.1.2",
     "source-map-support": "^0.4.3",
-    "tslint": "^3.15.1",
     "typescript": "^2.0.3",
     "whatwg-fetch": "^2.0.0",
     "yargs": "^6.5.0"
@@ -46,6 +45,7 @@
     "@types/graphql": "^0.8.5",
     "apollo-client": "^0.8",
     "fetch-mock": "^5.5.0",
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "tslint": "^3.15.1"
   }
 }
