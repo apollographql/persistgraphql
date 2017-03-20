@@ -78,3 +78,16 @@ app.use(
   },
 );
 ```
+Here's an example with a Hapi server extension using the `lodash` `invert` method:
+
+```js
+import queryMap from ‘../extracted_queries.json’;
+import { invert } from 'lodash';
+server.ext('onPreHandler', (req: Request, reply) => {
+  if (config.persistedQueries && req.url.path.indexOf('/graphql') >= 0 && req.payload.id) {
+    const invertedMap = invert(queryMap);
+    req.payload.query = invertedMap[req.payload.id]
+  }
+  return reply.continue();
+});
+```
