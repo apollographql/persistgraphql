@@ -371,7 +371,7 @@ describe('addPersistedQueries', () => {
         id: string,
       },
       operationName: string,
-    }
+    };
 
     const networkInterface = new GenericNetworkInterface();
     addPersistedQueries(networkInterface, queryMap);
