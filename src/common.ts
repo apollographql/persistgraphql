@@ -4,6 +4,8 @@
 // This file should not import any Node/server-specific modules.
 
 import {
+  DefinitionNode,
+  FragmentDefinitionNode,
   OperationDefinitionNode,
   DocumentNode,
   print,
@@ -21,6 +23,35 @@ export interface TransformedQueryWithId {
 }
 
 export type QueryTransformer = (doc: DocumentNode) => DocumentNode;
+
+// Sorting strategy for fragment definitions. Sorts fragment
+// definitions by their name and moves them to the end of the
+// query.
+export function sortFragmentsByName(a: DefinitionNode, b: DefinitionNode): number {
+  const aIsFragment = a.kind === 'FragmentDefinition';
+  const bIsFragment = b.kind === 'FragmentDefinition';
+
+  // If both aren't fragments, just leave them in place.
+  if (!aIsFragment && !bIsFragment) {
+    return 0;
+  }
+
+  // If both are fragments, sort them by their name.
+  if (aIsFragment && bIsFragment) {
+    const aName = (a as (FragmentDefinitionNode)).name.value;
+    const bName = (b as (FragmentDefinitionNode)).name.value;
+    return aName.localeCompare(bName);
+  }
+
+  // Move fragments to the end.
+  return aIsFragment ? 1 : -1;
+}
+
+// Apply sorting strategy for fragments.
+export function applyFragmentDefinitionSort(document: DocumentNode): DocumentNode {
+  document.definitions = document.definitions.sort(sortFragmentsByName);
+  return document;
+}
 
 // Apply queryTransformers to a query document.
 export function applyQueryTransformers(
@@ -59,5 +90,5 @@ export function getQueryDocumentKey(
   document: DocumentNode,
   queryTransformers: QueryTransformer[] = [],
 ): string {
-  return print(applyQueryTransformers(document, queryTransformers));
+  return print(applyFragmentDefinitionSort(applyQueryTransformers(document, queryTransformers)));
 }
