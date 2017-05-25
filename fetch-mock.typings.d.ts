@@ -79,7 +79,7 @@ declare namespace FetchMock {
     * Function(url, opts): A function that is passed the url and opts fetch()
       is called with and that returns any of the responses listed above
     */
-  type MockResponse = IResponse | Promise<IResponse>
+  type MockResponse = Response | Promise<Response>
                       | number | Promise<number>
                       | string | Promise<string>
                       | Object | Promise<Object>
