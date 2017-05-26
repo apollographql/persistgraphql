@@ -6,7 +6,7 @@
   "typings": "lib/index.d.ts",
   "typescript": {
     "definition": "lib/index.d.ts"
-  }
+  },
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
