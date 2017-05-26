@@ -6,3 +6,4 @@ import './extractFromAST';
 import './network_interface/ApolloNetworkInterface';
 import './queryTransformers';
 import './extractFromJS';
+import './common';
