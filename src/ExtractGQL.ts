@@ -264,7 +264,8 @@ export class ExtractGQL {
       kind: 'Document',
       definitions: [],
     };
-    retDocument.definitions = document.definitions.reduce((carry: FragmentDefinitionNode[], definition: DefinitionNode) => {
+
+    const reduceQueryDefinitions = (carry: FragmentDefinitionNode[], definition: DefinitionNode) => {
       const definitionName = (definition as (FragmentDefinitionNode | OperationDefinitionNode)).name;
       if ((isFragmentDefinition(definition) && queryFragmentNames[definitionName.value] === 1)) {
         const definitionExists = carry.findIndex(
@@ -278,7 +279,12 @@ export class ExtractGQL {
       }
 
       return carry;
-    }, ([] as FragmentDefinitionNode[])).sort(sortFragmentsByName);
+    };
+    
+    retDocument.definitions = document.definitions.reduce(
+      reduceQueryDefinitions,
+      ([] as FragmentDefinitionNode[])
+    ).sort(sortFragmentsByName);
     
     return retDocument;
   }
