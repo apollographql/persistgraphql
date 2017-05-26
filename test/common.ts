@@ -101,9 +101,19 @@ describe('common methods', () => {
         fragment b on Author { x }
         fragment c on Author { x } 
         fragment a on Author { x }
-        query { root }`;
+        query { 
+          ...a
+          ...b
+          ...c
+          ...d
+        }`;
       const result = gql`
-        query { root }
+        query { 
+          ...a
+          ...b
+          ...c
+          ...d
+        }
         fragment a on Author { x }
         fragment b on Author { x }
         fragment c on Author { x } 
