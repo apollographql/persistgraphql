@@ -4,7 +4,7 @@
 
 It scans a code directory and extracts GraphQL query documents from `.graphql` files. It then assigns these queries ID values/hashes and produces a JSON file which maps from queries to hashes/IDs. This map can then be used by the client and server to perform query whitelisting, query lookups (i.e. client only sends the hash/id, the server just looks up the corresponding query), etc.
 
-The npm package also provides a network interface for [Apollo Client](https://github.com/apollostack/apollo-client) that manages the query lookups in `persistgraphql/lib/browser` and middleware for Express servers in `persistgraphql/lib/server`. These will likely be moved to their own packages in the future to reduce bundle size.
+The npm package also provides a network interface for [Apollo Client](https://github.com/apollostack/apollo-client) that manages the query lookups in `persistgraphql/lib/browser`. To see how to extract the queries on the server, see the [code snippets](#server-side) below.
 
 # Installation
 For only the CLI tool:
@@ -13,7 +13,7 @@ For only the CLI tool:
 npm install -g persistgraphql
 ```
 
-As a dependency (for Express middlware or Apollo Client network interface):
+As a dependency (for Apollo Client network interface):
 
 ```shell
 npm install --save persistgraphql
