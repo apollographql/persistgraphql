@@ -58,6 +58,11 @@ export function addPersistedQueries(networkInterface: NetworkInterface, queryMap
   return Object.assign(networkInterface, {
     query: (request: Request): Promise<ExecutionResult> => {
       const queryDocument = request.query;
+
+      if (queryDocument === undefined) {
+        return Promise.reject(new Error('No query document was provided'));
+      }
+
       const queryKey = getQueryDocumentKey(queryDocument);
 
       if (!queryMap[queryKey]) {

@@ -56,7 +56,7 @@ export function applyFragmentDefinitionSort(document: DocumentNode): DocumentNod
 // Apply queryTransformers to a query document.
 export function applyQueryTransformers(
   document: DocumentNode,
-  queryTransformers: QueryTransformer[] = []
+  queryTransformers: QueryTransformer[] = [],
 ): DocumentNode {
   let currentDocument = document;
   queryTransformers.forEach((transformer) => {
@@ -78,7 +78,7 @@ export function getQueryKey(
   };
   return print(applyQueryTransformers(
     wrappingDocument,
-    queryTransformers
+    queryTransformers,
   ).definitions[0]);
 }
 

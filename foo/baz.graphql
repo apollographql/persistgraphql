@@ -1,0 +1,7 @@
+query foo {
+    faz
+    {
+        baz
+        fazbaz
+    }
+}
