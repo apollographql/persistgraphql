@@ -55,7 +55,7 @@ persistgraphql src/  --hash_ids
 
 ## Using a hash of the query as an ID to allow scaling for multiple clients
 
-Use the optional `hash_ids` flag to substitute a `sha512` hash of the query as the map value rather then the default which is an incremental integer. This will avoid ID collisions for multiple clients using the same server.
+Use the optional `hash_ids` flag to substitute a `sha512` hash of the query as the map value rather than the default which is an incremental integer. This will avoid ID collisions for multiple clients using the same server.
 
 ```
 persistgraphql src/ --add_typename
