@@ -2,6 +2,7 @@
 
 import fs = require('fs');
 import path = require('path');
+import hasha = require('hasha');
 
 import {
   parse,
@@ -42,11 +43,12 @@ import {
 import _ = require('lodash');
 
 export type ExtractGQLOptions = {
+  extension?: string,
+  hashIds?: boolean,
+  inJsCode?: boolean,
   inputFilePath: string,
   outputFilePath?: string,
   queryTransformers?: QueryTransformer[],
-  extension?: string,
-  inJsCode?: boolean,
 }
 
 export class ExtractGQL {
@@ -62,6 +64,9 @@ export class ExtractGQL {
 
   // The file extension to load queries from
   public extension: string;
+
+  // Whether to use a hash of the query as an ID in the query map
+  public hashIds: boolean = false;
 
   // Whether to look for standalone .graphql files or template literals in JavaScript code
   public inJsCode: boolean = false;
@@ -106,17 +111,19 @@ export class ExtractGQL {
   }
 
   constructor({
+    extension = 'graphql',
+    hashIds = false,
+    inJsCode = false,
     inputFilePath,
     outputFilePath = 'extracted_queries.json',
     queryTransformers = [],
-    extension = 'graphql',
-    inJsCode = false,
   }: ExtractGQLOptions) {
+    this.extension = extension;
+    this.hashIds = hashIds;
+    this.inJsCode = inJsCode;
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
-    this.extension = extension;
-    this.inJsCode = inJsCode;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -153,7 +160,7 @@ export class ExtractGQL {
       const transformedQueryWithFragments = this.getQueryFragments(transformedDocument, transformedDefinition);
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
       const docQueryKey = this.getQueryDocumentKey(transformedQueryWithFragments);
-      result[docQueryKey] = this.getQueryId();
+      result[docQueryKey] = this.hashIds ? hasha(docQueryKey) : this.getQueryId();
     });
     return result;
   }
@@ -280,12 +287,12 @@ export class ExtractGQL {
 
       return carry;
     };
-    
+
     retDocument.definitions = document.definitions.reduce(
       reduceQueryDefinitions,
       ([] as FragmentDefinitionNode[])
     ).sort(sortFragmentsByName);
-    
+
     return retDocument;
   }
 
@@ -333,6 +340,7 @@ export const main = (argv: YArgsv) => {
   // These are the unhypenated arguments that yargs does not process
   // further.
   const args: string[] = argv._
+  let hashIds: boolean = false;
   let inputFilePath: string;
   let outputFilePath: string;
   const queryTransformers: QueryTransformer[] = [];
@@ -353,7 +361,18 @@ export const main = (argv: YArgsv) => {
     queryTransformers.push(addTypenameTransformer);
   }
 
+  // Check if we are passed "--hash_ids", if we are, we have to
+  // use a hash of the query as an ID instead of integers.
+  // The hash_ids flag will use a sha512 hash of the query as the map value
+  //rather then the default which is an incremental integer
+  // This will avoid ID collisions for multiple clients using the same server.
+  if (argv['hash_ids']) {
+    console.log('Using hash of query as ID.');
+    hashIds = true;
+  }
+
   const options: ExtractGQLOptions = {
+    hashIds,
     inputFilePath,
     outputFilePath,
     queryTransformers,

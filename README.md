@@ -24,7 +24,7 @@ npm install --save persistgraphql
 The build tool binary is called `persistgraphql`. Running it with no other arguments should give:
 
 ```
-Usage: persistgraphql input_file [output file] [--add_typename]
+Usage: persistgraphql input_file [output file] [--add_typename] [--hash_ids]
 ```
 
 It can be called on a file containing GraphQL query definitions with extension `.graphql`:
@@ -48,6 +48,14 @@ persistgraphql index.ts output.json
 ## Adding Typenames to Extracted Queries
 
 It can also take the `--add_typename` flag which will apply a query transformation to the query documents, adding the `__typename` field at every level of the query. You must pass this option if your client code uses this query transformation.
+
+```
+persistgraphql src/  --hash_ids
+```
+
+## Using a hash of the query as an ID to allow scaling for multiple clients
+
+Use the optional `hash_ids` flag to substitute a `sha512` hash of the query as the map value rather then the default which is an incremental integer. This will avoid ID collisions for multiple clients using the same server.
 
 ```
 persistgraphql src/ --add_typename
