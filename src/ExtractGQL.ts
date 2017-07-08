@@ -364,7 +364,7 @@ export const main = (argv: YArgsv) => {
   // Check if we are passed "--hash_ids", if we are, we have to
   // use a hash of the query as an ID instead of integers.
   // The hash_ids flag will use a sha512 hash of the query as the map value
-  //rather than the default which is an incremental integer
+  // rather than the default which is an incremental integer
   // This will avoid ID collisions for multiple clients using the same server.
   if (argv['hash_ids']) {
     console.log('Using hash of query as ID.');
