@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "apollo-client": "^1.1",
-    "graphql": "^0.9.4",
+    "graphql": ">=0.9.4 <0.11",
     "graphql-tag": "^2.0.0",
     "lodash": "^4.17.4",
     "whatwg-fetch": "^2.0.3",
