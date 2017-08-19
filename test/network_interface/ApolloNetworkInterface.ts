@@ -376,7 +376,8 @@ describe('addPersistedQueries', () => {
     const networkInterface = new GenericNetworkInterface();
     addPersistedQueries(networkInterface, queryMap);
     const expectedId = queryMap[getQueryDocumentKey(request.query)];
-    return networkInterface.query(request).then((persistedQuery: persistedQueryType) => {
+    return networkInterface.query(request).then((result: ExecutionResult) => {
+      const persistedQuery: persistedQueryType = <any>result;
       const id = persistedQuery.id;
       const variables = persistedQuery.variables;
       const operationName = persistedQuery.operationName;
