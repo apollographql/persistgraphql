@@ -49,7 +49,9 @@ export type ExtractGQLOptions = {
   inputFilePath: string,
   outputFilePath?: string,
   queryTransformers?: QueryTransformer[],
-}
+  extension?: string,
+  inJsCode?: boolean,
+};
 
 export class ExtractGQL {
   public inputFilePath: string;
@@ -145,7 +147,7 @@ export class ExtractGQL {
   // Just calls getQueryDocumentKey with this.queryTransformers as its
   // set of query transformers and returns a serialization of the query.
   public getQueryDocumentKey(
-    document: DocumentNode
+    document: DocumentNode,
   ): string {
     return getQueryDocumentKey(document, this.queryTransformers);
   }
@@ -208,7 +210,7 @@ export class ExtractGQL {
             const noInterps = literalContents.map(eliminateInterpolations);
             const joined = noInterps.join('\n');
             return joined;
-          })
+          });
         } else {
           return this.readGraphQLFile(inputFile);
         }
@@ -276,7 +278,7 @@ export class ExtractGQL {
       const definitionName = (definition as (FragmentDefinitionNode | OperationDefinitionNode)).name;
       if ((isFragmentDefinition(definition) && queryFragmentNames[definitionName.value] === 1)) {
         const definitionExists = carry.findIndex(
-          (value: FragmentDefinitionNode) => value.name.value === definitionName.value
+          (value: FragmentDefinitionNode) => value.name.value === definitionName.value,
         ) !== -1;
 
         // If this definition doesn't exist yet, add it.
@@ -290,7 +292,7 @@ export class ExtractGQL {
 
     retDocument.definitions = document.definitions.reduce(
       reduceQueryDefinitions,
-      ([] as FragmentDefinitionNode[])
+      ([] as FragmentDefinitionNode[]),
     ).sort(sortFragmentsByName);
 
     return retDocument;

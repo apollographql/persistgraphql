@@ -89,7 +89,7 @@ export function getFragmentNames(selectionSet: SelectionSetNode, document: Docum
       fragmentNames[selection.name.value] = 1;
       const innerFragmentNames = getFragmentNames(
         fragmentDefinitions[selection.name.value].selectionSet,
-        document
+        document,
       );
       fragmentNames = _.merge(fragmentNames, innerFragmentNames);
     } else if (isInlineFragment(selection) || isField(selection)) {

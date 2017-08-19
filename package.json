@@ -3,6 +3,10 @@
   "version": "0.3.1",
   "description": "A build tool for GraphQL projects.",
   "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "typescript": {
+    "definition": "lib/index.d.ts"
+  },
   "scripts": {
     "pretest": "npm run compile",
     "test": "mocha --reporter spec --full-trace lib/test/tests.js",
@@ -25,7 +29,7 @@
   },
   "dependencies": {
     "apollo-client": "^1.1",
-    "graphql": "^0.9.4",
+    "graphql": ">=0.9.4 <0.11",
     "graphql-tag": "^2.0.0",
     "hasha": "^3.0.0",
     "lodash": "^4.17.4",
