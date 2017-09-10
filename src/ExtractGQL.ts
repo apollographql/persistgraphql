@@ -317,9 +317,12 @@ export class ExtractGQL {
       this.writeOutputMap(outputMap, this.outputFilePath).then(() => {
         console.log(`Wrote output file to ${this.outputFilePath}.`);
       }).catch((err) => {
-        console.log(`Unable to process path ${this.outputFilePath}. Error message: `);
+        console.log(`Unable to process ouput path ${this.outputFilePath}. Error message: `);
         console.log(`${err.message}`);
       });
+    }).catch((err) => {
+      console.log(`Unable to process input path ${this.inputFilePath}. Error message: `);
+      console.log(`${err.message}`);
     });
   }
 }
