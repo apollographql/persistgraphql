@@ -4,7 +4,12 @@ import {
   addPersistedQueries,
 } from './src/network_interface/ApolloNetworkInterface';
 
+import {
+  OutputMap,
+} from './src/common';
+
 export {
   PersistedQueryNetworkInterface,
   addPersistedQueries,
+  OutputMap,
 };

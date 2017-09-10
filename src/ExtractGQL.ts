@@ -41,8 +41,6 @@ import {
 
 import _ = require('lodash');
 
-export { OutputMap };
-
 export type ExtractGQLOptions = {
   inputFilePath: string,
   outputFilePath?: string,
