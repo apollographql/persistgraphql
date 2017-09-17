@@ -11,5 +11,6 @@ import {
 export {
   PersistedQueryNetworkInterface,
   addPersistedQueries,
+  getQueryDocumentKey,
   OutputMap,
 };
