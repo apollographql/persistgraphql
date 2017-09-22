@@ -417,6 +417,13 @@ describe('ExtractGQL', () => {
       });
     });
 
+    it('should process a directory with no graphql files', (done) => {
+      egql.processInputPath('./test/fixtures/no_queries').then((result: OutputMap) => {
+        assert.equal(Object.keys(result).length, 2);
+        done();
+      });
+    });
+
     it('should process a file with a fragment reference to a different file', () => {
       const expectedQuery = gql`
         query {
