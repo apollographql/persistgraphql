@@ -6,6 +6,7 @@ import {
 
 import {
   OutputMap,
+  getQueryDocumentKey,
 } from './src/common';
 
 export {
