@@ -239,7 +239,7 @@ export class ExtractGQL {
             });
 
             Promise.all(promises).then((queryStrings: string[]) => {
-              resolve(queryStrings.reduce((x, y) => x + y));
+              resolve(queryStrings.reduce((x, y) => x + y, ''));
             });
           });
         } else {
