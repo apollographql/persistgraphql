@@ -61,7 +61,7 @@ export class ExtractGQL {
   public queryTransformers: QueryTransformer[] = [];
 
   // The file extension to load queries from
-  public extension: string;
+  public extension: Array<string> = ['graphql'];
 
   // Whether to look for standalone .graphql files or template literals in JavaScript code
   public inJsCode: boolean = false;
@@ -109,13 +109,13 @@ export class ExtractGQL {
     inputFilePath,
     outputFilePath = 'extracted_queries.json',
     queryTransformers = [],
-    extension = 'graphql',
+    extension = '',
     inJsCode = false,
   }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
-    this.extension = extension;
+    this.extension = this.extension.concat(extension.split(',').map(e => e.trim()))
     this.inJsCode = inJsCode;
   }
 
@@ -193,8 +193,8 @@ export class ExtractGQL {
     return Promise.resolve().then(() => {
       const extension = ExtractGQL.getFileExtension(inputFile);
 
-      if (extension === this.extension) {
-        if (this.inJsCode) {
+      if (this.extension.indexOf(extension) > -1) {
+        if (this.inJsCode && extension === 'js') {
           // Read from a JS file
           return ExtractGQL.readFile(inputFile).then((result) => {
             const literalContents = findTaggedTemplateLiteralsInJS(result, this.literalTag);
