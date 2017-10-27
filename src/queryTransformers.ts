@@ -18,8 +18,6 @@ import {
   isFragmentDefinition,
 } from './extractFromAST';
 
-import { cloneDeep } from 'lodash';
-
 // TODO Most of this implementation has been copped from here:
 // https://github.com/apollostack/apollo-client/blob/master/src/queries/queryTransform.ts
 //
@@ -60,7 +58,7 @@ function addTypenameToSelectionSet(
 }
 
 export const addTypenameTransformer: QueryTransformer = (doc: DocumentNode) => {
-  const docClone = cloneDeep(doc);
+  const docClone = JSON.parse(JSON.stringify(doc));
 
   docClone.definitions.forEach((definition: DefinitionNode) => {
     const isRoot = definition.kind === 'OperationDefinition';
