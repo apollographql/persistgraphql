@@ -1,3 +1,4 @@
+import hasha = require('hasha');
 import * as chai from 'chai';
 const { assert } = chai;
 
@@ -87,6 +88,34 @@ describe('PersistedQueryNetworkInterface', () => {
       assert(err);
       assert.include(err.message, 'Could not find');
       done();
+    });
+  });
+
+  describe('Using --hash_ids', () => {
+    const egql = new ExtractGQL({ hashIds: true, inputFilePath: 'nothing' });
+    const queriesDocument = gql`
+    query getAuthor {
+      author {
+        firstName
+        lastName
+      }
+    }
+    query getHouse {
+      house {
+        address
+      }
+    }
+    `;
+    const queryMap = egql.createMapFromDocument(queriesDocument);
+    const keys = Object.keys(queryMap);
+
+    it('should use a hash of the query as the value if --hash_ids is true', () => {
+        assert.equal(queryMap[keys[0]], hasha(keys[0]));
+        assert.equal(queryMap[keys[1]], hasha(keys[1]));
+    });
+
+    it('should not use an integer as the value if --hash_ids is true', () => {
+        assert.notEqual(queryMap[keys[0]], 1);
     });
   });
 

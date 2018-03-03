@@ -18,3 +18,8 @@ declare module 'deep-assign' {
   function deepAssign(...objects: any[]): any;
   export = deepAssign;
 }
+
+declare module 'hasha' {
+  function hasha(...objects: any[]): any;
+  export = hasha;
+}
