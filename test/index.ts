@@ -446,6 +446,74 @@ describe('ExtractGQL', () => {
         );
       });
     });
+    
+    it('should process both a JS file and a graphql file', () => {
+      const expectedQuery = gql`
+        query {
+          author {
+            ...firstName
+            ...lastName
+          }
+        }
+        fragment firstName on Author {
+          firstName
+        }
+        fragment lastName on Author {
+          lastName
+        }
+        `;
+  
+      const jsEgql = new ExtractGQL({
+        inputFilePath: 'idk',
+        extension: 'js',
+        inJsCode: true,
+        outputFilePath: 'idk',
+      });
+  
+      return jsEgql.processInputPath('./test/fixtures/multiple_filetypes')
+        .then((result: OutputMap) => {
+          const keys = Object.keys(result);
+          assert.equal(keys.length, 1);
+          assert.equal(
+            keys[0],
+            print(expectedQuery)
+          );
+        });
+    });
+
+    it('should process arbitrary file extensions', () => {
+      const expectedQuery = gql`
+        query {
+          author {
+            ...firstName
+            ...lastName
+          }
+        }
+        fragment firstName on Author {
+          firstName
+        }
+        fragment lastName on Author {
+          lastName
+        }
+        `;
+  
+      const jsEgql = new ExtractGQL({
+        inputFilePath: 'idk',
+        extension: 'js,gql',
+        inJsCode: true,
+        outputFilePath: 'idk',
+      });
+  
+      return jsEgql.processInputPath('./test/fixtures/arbitrary_filetypes')
+        .then((result: OutputMap) => {
+          const keys = Object.keys(result);
+          assert.equal(keys.length, 1);
+          assert.equal(
+            keys[0],
+            print(expectedQuery)
+          );
+        });
+    });
 
     it('should process a JS file with queries', () => {
       const expectedQuery = gql`

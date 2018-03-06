@@ -1,0 +1,3 @@
+fragment lastName on Author {
+  lastName
+}
