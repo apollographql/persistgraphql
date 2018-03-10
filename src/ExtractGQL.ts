@@ -47,6 +47,7 @@ export type ExtractGQLOptions = {
   queryTransformers?: QueryTransformer[],
   extension?: string,
   inJsCode?: boolean,
+  literalTag?: string,
 };
 
 export class ExtractGQL {
@@ -111,12 +112,14 @@ export class ExtractGQL {
     queryTransformers = [],
     extension = 'graphql',
     inJsCode = false,
+    literalTag = 'gql',
   }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
     this.extension = extension;
     this.inJsCode = inJsCode;
+    this.literalTag = literalTag;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -368,6 +371,10 @@ export const main = (argv: YArgsv) => {
 
   if (argv['extension']) {
     options.extension = argv['extension'];
+  }
+
+  if (argv['literal_tag']) {
+    options.literalTag = argv['literal_tag'];
   }
 
   new ExtractGQL(options).extract();
