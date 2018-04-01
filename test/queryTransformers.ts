@@ -14,6 +14,7 @@ import {
 
 import {
   addTypenameTransformer,
+  removeConnectionDirectivesTransformer,
 } from '../src/queryTransformers';
 
 describe('query transformers', () => {
@@ -83,6 +84,70 @@ describe('query transformers', () => {
          }
        }`);
 
+    });
+  });
+
+  describe('typename query transformer', () => {
+    const assertTransform = (inputQuery: DocumentNode, expected: DocumentNode) => {
+      assert.equal(
+        print(removeConnectionDirectivesTransformer(inputQuery)),
+        print(expected),
+      );
+    };
+
+    it('should remove @connection from all the levels of a simple query', () => {
+      assertTransform(
+        gql`
+        query author {
+          firstName @connection(key: "nickame")
+          lastName @connection(key: "surname")
+        }`,
+        gql`
+        query author {
+          firstName
+          lastName
+        }`,
+      );
+    });
+
+    it('should remove @connection from all the levels of a nested query', () => {
+      assertTransform(
+        gql`
+        query author {
+          firstName @connection(key: "nickame") {
+            suffix @connection(key: "somethingLikeJr") {
+              character @connection(key: "c")
+              symbol @connection(key: "s")
+            }
+          }
+          lastName @connection(key: "surname")
+        }`,
+        gql`
+        query author {
+          firstName {
+            suffix {
+              character
+              symbol
+            }
+          }
+          lastName
+        }`,
+      );
+    });
+
+    it('should remove @connection while ignoring other directives', () => {
+      assertTransform(
+        gql`
+        query author {
+          firstName @connection(key: "nickame")
+          lastName @format(key: "surname")
+        }`,
+        gql`
+        query author {
+          firstName
+          lastName @format(key: "surname")
+        }`,
+      );
     });
   });
 });
