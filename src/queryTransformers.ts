@@ -18,6 +18,8 @@ import {
   isFragmentDefinition,
 } from './extractFromAST';
 
+import _ = require('lodash');
+
 // TODO Most of this implementation has been copped from here:
 // https://github.com/apollostack/apollo-client/blob/master/src/queries/queryTransform.ts
 //
@@ -63,6 +65,39 @@ export const addTypenameTransformer: QueryTransformer = (doc: DocumentNode) => {
   docClone.definitions.forEach((definition: DefinitionNode) => {
     const isRoot = definition.kind === 'OperationDefinition';
     addTypenameToSelectionSet((definition as OperationDefinitionNode).selectionSet, isRoot);
+  });
+
+  return docClone;
+};
+
+function removeConnectionDirectivesFromSelectionSet(
+  selectionSet: SelectionSetNode,
+) {
+  if (selectionSet.selections) {
+    selectionSet.selections.forEach(selection => {
+      if (selection.kind === 'Field') {
+        if (selection.directives) {
+          selection.directives = selection.directives.filter(
+            directive => _.get(directive, 'name.value') !== 'connection'
+          );
+        }
+        if (selection.selectionSet) {
+          removeConnectionDirectivesFromSelectionSet(selection.selectionSet);
+        }
+      }
+    });
+  }
+}
+
+export const removeConnectionDirectivesTransformer: QueryTransformer = (
+  doc: DocumentNode,
+) => {
+  const docClone = JSON.parse(JSON.stringify(doc));
+
+  docClone.definitions.forEach((definition: DefinitionNode) => {
+    removeConnectionDirectivesFromSelectionSet(
+      (definition as OperationDefinitionNode).selectionSet
+    );
   });
 
   return docClone;

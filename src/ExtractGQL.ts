@@ -36,7 +36,7 @@ import {
 } from './common';
 
 import {
-  addTypenameTransformer,
+  addTypenameTransformer, removeConnectionDirectivesTransformer,
 } from './queryTransformers';
 
 import _ = require('lodash');
@@ -355,6 +355,8 @@ export const main = (argv: YArgsv) => {
     console.log('Using the add-typename query transformer.');
     queryTransformers.push(addTypenameTransformer);
   }
+  // To be consistent with apollo-client, remove @connection directives
+  queryTransformers.push(removeConnectionDirectivesTransformer);
 
   const options: ExtractGQLOptions = {
     inputFilePath,
