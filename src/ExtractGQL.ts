@@ -342,6 +342,7 @@ export const main = (argv: YArgsv) => {
 
   if (args.length < 1) {
     console.log('Usage: persistgraphql input_file [output_file]');
+    process.exit(1);
   } else if (args.length === 1) {
     inputFilePath = args[0];
   } else {
