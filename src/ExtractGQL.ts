@@ -174,6 +174,10 @@ export class ExtractGQL {
 
   // Creates an OutputMap from an array of GraphQL documents read as strings.
   public createOutputMapFromString(docString: string): OutputMap {
+    // Graphql can't parse empty documents (e.g. from js files with no `gql` tags);
+    // return an empty output map.
+    if (!docString) return {};
+
     const doc = parse(docString);
     const docMap = separateOperations(doc);
 
