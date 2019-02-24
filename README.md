@@ -69,6 +69,20 @@ It is also possible to extract GraphQL queries from JavaScript files using `--ex
 persistgraphql src/index.js --js --extension=js
 ```
 
+## Setting the Hash Type
+
+By default, the IDs for the queries will be set in sequential order by when they are found. If you want to use something other than this, a few options are available by using `--hash=[type]`. These include:
+
+`sequential` (default) creates a numberical id for each query
+
+`md5` creates a hash based on the query that is found in the file
+
+`sha1` identical to md5, except uses the sha1 hashing algorithm
+
+`uuid` creates a uuidv4 for each query
+
+
+
 # Apollo Client Network Interface
 
 This package provides an implementation of an Apollo Client network interface that provides persisted query support. It serves as a drop-in replacement for the standard network interface and uses the query map given by `persistgraphql` in order to send only query hashes/ids to the serverather than the query document.

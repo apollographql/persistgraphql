@@ -1,5 +1,5 @@
 // This file implements the extractgql CLI tool.
-
+import crypto = require('crypto');
 import fs = require('fs');
 import path = require('path');
 
@@ -41,12 +41,17 @@ import {
 
 import _ = require('lodash');
 
+export type HashTypeOption = 'md5' | 'sha1' | 'sequential' | 'uuid';
+
+export const HASH_TYPES: HashTypeOption[] = ['md5', 'sha1', 'sequential', 'uuid'];
+
 export type ExtractGQLOptions = {
   inputFilePath: string,
   outputFilePath?: string,
   queryTransformers?: QueryTransformer[],
   extension?: string,
   inJsCode?: boolean,
+  hashType?: HashTypeOption,
 };
 
 export class ExtractGQL {
@@ -65,6 +70,9 @@ export class ExtractGQL {
 
   // Whether to look for standalone .graphql files or template literals in JavaScript code
   public inJsCode: boolean = false;
+
+  // What type of hash/id should be used
+  public hashType: HashTypeOption;
 
   // The template literal tag for GraphQL queries in JS code
   public literalTag: string = 'gql';
@@ -111,12 +119,14 @@ export class ExtractGQL {
     queryTransformers = [],
     extension = 'graphql',
     inJsCode = false,
+    hashType = 'sequential',
   }: ExtractGQLOptions) {
     this.inputFilePath = inputFilePath;
     this.outputFilePath = outputFilePath;
     this.queryTransformers = queryTransformers;
     this.extension = extension;
     this.inJsCode = inJsCode;
+    this.hashType = hashType;
   }
 
   // Add a query transformer to the end of the list of query transformers.
@@ -153,7 +163,7 @@ export class ExtractGQL {
       const transformedQueryWithFragments = this.getQueryFragments(transformedDocument, transformedDefinition);
       transformedQueryWithFragments.definitions.unshift(transformedDefinition);
       const docQueryKey = this.getQueryDocumentKey(transformedQueryWithFragments);
-      result[docQueryKey] = this.getQueryId();
+      result[docQueryKey] = this.getQueryId(docQueryKey);
     });
     return result;
   }
@@ -290,9 +300,26 @@ export class ExtractGQL {
   }
 
   // Returns unique query ids.
-  public getQueryId() {
-    this.queryId += 1;
-    return this.queryId;
+  public getQueryId(documentQuery: string) {
+    switch (this.hashType) {
+      case 'md5':
+        return crypto.createHash('md5').update(documentQuery, 'utf8').digest('hex');
+      case 'sha1':
+        return crypto.createHash('sha1').update(documentQuery, 'utf8').digest('hex');
+      case 'uuid':
+        const randomBytes = crypto.randomBytes(32).toString('hex');
+        return (
+          randomBytes.substr(0, 8) + '-' +
+          randomBytes.substr(8, 4) + '-' +
+          randomBytes.substr(12, 4) + '-' +
+          randomBytes.substr(16, 4) + '-' +
+          randomBytes.substr(20, 12)
+        );
+      case 'sequential':
+      default:
+        this.queryId += 1;
+        return this.queryId;
+    }
   }
 
   // Writes an OutputMap to a given file path.
@@ -368,6 +395,14 @@ export const main = (argv: YArgsv) => {
 
   if (argv['extension']) {
     options.extension = argv['extension'];
+  }
+
+  if (argv['hash']) {
+    if (HASH_TYPES.indexOf(argv['hash']) === -1) {
+      console.log(`Invalid hash operation. Must be one of [${HASH_TYPES.join(', ')}]`);
+      process.exit(1);
+    }
+    options.hashType = argv['hash'];
   }
 
   new ExtractGQL(options).extract();
